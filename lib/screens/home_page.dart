@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
+import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
 import 'package:vocabulary_trainer/screens/subject_page.dart';
-import 'package:vocabulary_trainer/widgets/EditableTextWidget.dart';
+import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class HomePage extends StatefulWidget {
@@ -78,6 +79,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget contextBuilder(BuildContext context, int index) {
     final subject = subjects[index];
+    // final globalKey = subject.globalKey;
     return AnimationConfiguration.staggeredGrid(
       columnCount: columnCount,
       position: index,
@@ -86,10 +88,34 @@ class _HomePageState extends State<HomePage> {
         scale: 0.5,
         child: FadeInAnimation(
           child: GestureDetector(
+            // onTapDown: (details) {
+            //   final RenderBox renderBox =
+            //       context.findRenderObject() as RenderBox;
+            //   final localPos = renderBox.globalToLocal(details.globalPosition);
+
+            //   final alignment = Alignment(
+            //     (localPos.dx / renderBox.size.width) * 2 - 1,
+            //     (localPos.dy / renderBox.size.height) * 2 - 1,
+            //   );
+
+            //   Navigator.of(context).push(
+            //     CustomPageTransitionAnimation(
+            //       SubjectPage(
+            //         subject: subject,
+            //       ),
+            //       alignment,
+            //     ),
+            //   );
+            // },
             onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => SubjectPage(subject: subject),
-              ));
+              Navigator.of(context).push(
+                CustomPageTransitionAnimation(
+                  SubjectPage(
+                    subject: subject,
+                  ),
+                  const Alignment(0, 0),
+                ),
+              );
             },
             onLongPress: () {
               _editSubject(index);
@@ -111,6 +137,8 @@ class _HomePageState extends State<HomePage> {
               child: Center(
                 child: Text(
                   subject.name,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.visible,
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -123,17 +151,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  Widget oldContextBuilder(BuildContext context, int index) => ListTile(
-        title: Text(subjects[index].name),
-        tileColor: subjects[index].color,
-        onTap: () {
-          print("TODO -> openSubjectScreen..");
-        },
-        onLongPress: () {
-          print("TODO -> AskToDeleteSubject");
-        },
-      );
 
   void _addNewSubject() async {
     String? newSubjectName = await _showAddItemDialog();
@@ -231,5 +248,27 @@ class _HomePageState extends State<HomePage> {
       },
     );
     return subjectName;
+  }
+
+  PageRouteBuilder _createRoute(Widget nextScreen) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeInOut;
+
+        var tween = Tween(begin: begin, end: end).chain(
+          CurveTween(curve: curve),
+        );
+
+        var offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
+      },
+    );
   }
 }

@@ -1,8 +1,15 @@
+import 'dart:io';
+
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
-import 'package:vocabulary_trainer/widgets/EditableTextWidget.dart';
+import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
+
+import 'dart:ui';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
+//FlipCard dimensions: 400 * 600
 
 class StudyCardEditor extends StatefulWidget {
   StudyCard studyCard;
@@ -14,24 +21,42 @@ class StudyCardEditor extends StatefulWidget {
   State<StudyCardEditor> createState() => _StudyCardEditorState();
 }
 
+enum SelectedMode {
+  StrokeWidth,
+  Opacity,
+  Color,
+}
+
 class _StudyCardEditorState extends State<StudyCardEditor> {
+  Color selectedColor = Colors.black;
+  Color pickerColor = Colors.black;
+  double strokeWidth = 3.0;
+  List<DrawingPoints> points = [];
+  bool showBottomList = false;
+  double opacity = 1.0;
+  StrokeCap strokeCap = (Platform.isAndroid) ? StrokeCap.butt : StrokeCap.round;
+  SelectedMode selectedMode = SelectedMode.StrokeWidth;
+  List<Color> colors = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.amber,
+    Colors.black
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         shadowColor: const Color.fromARGB(127, 127, 127, 127),
         backgroundColor: const Color.fromARGB(127, 127, 127, 127),
-        title: Row(
-          children: [
-            Text("${widget.parentTopic.name} / "),
-            EditableTextWidget(
-              initialText: widget.studyCard.name,
-              onTextSaved: (text) {
-                widget.studyCard.setName(text);
-                setState(() {});
-              },
-            ),
-          ],
+        title: EditableTextWidget(
+          preText: "${widget.parentTopic.name} / ",
+          initialText: widget.studyCard.name,
+          onTextSaved: (text) {
+            widget.studyCard.setName(text);
+            setState(() {});
+          },
         ),
         actions: const [
           // IconButton(
@@ -40,55 +65,267 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
           // ),
         ],
       ),
-      body: Center(
-        child: Card(
-          elevation: 0.0,
-          margin: const EdgeInsets.all(16.0),
-          color: Color(0x00000000),
-          child: FlipCard(
-            direction: FlipDirection.HORIZONTAL,
-            side: CardSide.FRONT,
-            flipOnTouch: true,
-            speed: 1000,
-            onFlipDone: (status) async {
-              print("Status:");
-              print(status);
-            },
-            front: Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF006666),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: AnimatedContainer(
+          duration: const Duration(seconds: 1),
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50.0),
+              color: Theme.of(context).primaryColor),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Front', style: Theme.of(context).textTheme.headline1),
-                    Text('Click here to flip back',
-                        style: Theme.of(context).textTheme.bodyText1),
+                    IconButton(
+                        icon: const Icon(Icons.album),
+                        onPressed: () {
+                          setState(() {
+                            if (selectedMode == SelectedMode.StrokeWidth) {
+                              showBottomList = !showBottomList;
+                            }
+                            selectedMode = SelectedMode.StrokeWidth;
+                          });
+                        }),
+                    IconButton(
+                        icon: const Icon(Icons.opacity),
+                        onPressed: () {
+                          setState(() {
+                            if (selectedMode == SelectedMode.Opacity) {
+                              showBottomList = !showBottomList;
+                            }
+                            selectedMode = SelectedMode.Opacity;
+                          });
+                        }),
+                    IconButton(
+                        icon: const Icon(Icons.color_lens),
+                        onPressed: () {
+                          setState(() {
+                            if (selectedMode == SelectedMode.Color) {
+                              showBottomList = !showBottomList;
+                            }
+                            selectedMode = SelectedMode.Color;
+                          });
+                        }),
+                    IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            showBottomList = false;
+                            points.clear();
+                          });
+                        }),
                   ],
                 ),
-              ),
-            ),
-            back: Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF006666),
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                Visibility(
+                  visible: showBottomList,
+                  child: (selectedMode == SelectedMode.Color)
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: getColorList(),
+                        )
+                      : Slider(
+                          value: (selectedMode == SelectedMode.StrokeWidth)
+                              ? strokeWidth
+                              : opacity,
+                          max: (selectedMode == SelectedMode.StrokeWidth)
+                              ? 50.0
+                              : 1.0,
+                          min: 0.0,
+                          onChanged: (val) {
+                            setState(
+                              () {
+                                if (selectedMode == SelectedMode.StrokeWidth) {
+                                  strokeWidth = val;
+                                } else {
+                                  opacity = val;
+                                }
+                              },
+                            );
+                          },
+                        ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text('Back', style: Theme.of(context).textTheme.headline1),
-                    Text('Click here to flip front',
-                        style: Theme.of(context).textTheme.bodyText1),
-                  ],
-                ),
-              ),
+              ],
             ),
           ),
         ),
       ),
+      body: _body(context),
     );
   }
+
+  Column _body(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    // final height = MediaQuery.of(context).size.height;
+
+    final containerMargin = EdgeInsets.only(
+      top: (width - width * 0.8) / 2,
+      bottom: width - width * 0.8,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: containerMargin,
+              color: const Color.fromARGB(255, 255, 255, 255),
+              width: width * 0.8,
+              height: width * 0.8 * 6 / 4,
+              child: CustomPaint(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  List<Widget> getColorList() {
+    List<Widget> listWidget = [];
+    for (Color color in colors) {
+      listWidget.add(colorCircle(color));
+    }
+    Widget colorPicker = GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Pick a color!'),
+            content: SingleChildScrollView(
+              child: ColorPicker(
+                pickerColor: pickerColor,
+                onColorChanged: (color) {
+                  pickerColor = color;
+                },
+                //enableLabel: true,
+                pickerAreaHeightPercent: 0.8,
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Save'),
+                onPressed: () {
+                  setState(() => selectedColor = pickerColor);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+      child: ClipOval(
+        child: Container(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          height: 36,
+          width: 36,
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+            colors: [Colors.red, Colors.green, Colors.blue],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )),
+        ),
+      ),
+    );
+    listWidget.add(colorPicker);
+    return listWidget;
+  }
+
+  Widget colorCircle(Color color) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedColor = color;
+        });
+      },
+      child: ClipOval(
+        child: Container(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          height: 36,
+          width: 36,
+          color: color,
+        ),
+      ),
+    );
+  }
+  // Card _cardExample(BuildContext context) {
+  //   return Card(
+  //     elevation: 0.0,
+  //     margin: const EdgeInsets.all(16.0),
+  //     color: const Color(0x00000000),
+  //     child: FlipCard(
+  //       direction: FlipDirection.HORIZONTAL,
+  //       side: CardSide.FRONT,
+  //       flipOnTouch: true,
+  //       speed: 1000,
+  //       onFlipDone: (status) async {
+  //         print("Status:");
+  //         print(status);
+  //       },
+  //       front: Expanded(
+  //         child: Container(
+  //           decoration: const BoxDecoration(
+  //             color: Color(0xFF006666),
+  //             borderRadius: BorderRadius.all(Radius.circular(8.0)),
+  //           ),
+  //           child: Column(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: <Widget>[
+  //               Text('Front', style: Theme.of(context).textTheme.displayLarge),
+  //               Text('Click here to flip back',
+  //                   style: Theme.of(context).textTheme.bodyLarge),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //       back: Expanded(
+  //         child: Container(
+  //           decoration: const BoxDecoration(
+  //             color: Color(0xFF006666),
+  //             borderRadius: BorderRadius.all(Radius.circular(8.0)),
+  //           ),
+  //           child: Column(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: <Widget>[
+  //               Text('Back', style: Theme.of(context).textTheme.displayLarge),
+  //               Text('Click here to flip front',
+  //                   style: Theme.of(context).textTheme.bodyLarge),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+}
+
+class StudyCardPainter extends CustomPainter {
+  final List<DrawingPoints> _pointsList;
+
+  StudyCardPainter(this._pointsList);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // for (var i = 0; i < _pointsList.length; i++) {
+    //   if(_pointsList[i])
+    // }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    // TODO: implement shouldRepaint
+    throw UnimplementedError();
+  }
+}
+
+class DrawingPoints {
+  Paint paint;
+  Offset points;
+  DrawingPoints({required this.points, required this.paint});
 }

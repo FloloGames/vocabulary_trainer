@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 
 class EditableTextWidget extends StatefulWidget {
+  final TextStyle textStyle;
   final String initialText;
+  final String preText;
   final Function(String) onTextSaved;
 
-  EditableTextWidget({required this.initialText, required this.onTextSaved});
+  const EditableTextWidget(
+      {super.key,
+      required this.initialText,
+      this.preText = "",
+      this.textStyle = const TextStyle(),
+      required this.onTextSaved});
 
   @override
   _EditableTextWidgetState createState() => _EditableTextWidgetState();
@@ -42,11 +49,8 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
               },
             )
           : Text(
-              textEditingController.text,
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
+              widget.preText + textEditingController.text,
+              style: widget.textStyle,
             ),
     );
   }

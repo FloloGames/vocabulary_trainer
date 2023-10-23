@@ -3,13 +3,17 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
+import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
 import 'package:vocabulary_trainer/screens/topic_page.dart';
-import 'package:vocabulary_trainer/widgets/EditableTextWidget.dart';
+import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class SubjectPage extends StatefulWidget {
   Subject subject;
-  SubjectPage({super.key, required this.subject});
+  SubjectPage({
+    super.key,
+    required this.subject,
+  });
 
   @override
   State<SubjectPage> createState() => _SubjectPageState();
@@ -48,68 +52,16 @@ class _SubjectPageState extends State<SubjectPage> {
     );
   }
 
-  Widget contextBuilder(BuildContext context, int index) {
-    final topic = widget.subject.topics[index];
-    return AnimationConfiguration.staggeredGrid(
-      columnCount: columnCount,
-      position: index,
-      duration: const Duration(milliseconds: 375),
-      child: ScaleAnimation(
-        scale: 0.5,
-        child: FadeInAnimation(
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => TopicPage(
-                  parentSubject: widget.subject,
-                  topic: topic,
-                ),
-              ));
-            },
-            onLongPress: () {
-              _editSubject(index);
-            },
-            child: AnimatedContainer(
-              height: 100,
-              duration: const Duration(milliseconds: 375),
-              padding: const EdgeInsets.all(8.0), // Add padding
-              margin: const EdgeInsets.all(08.0),
-              decoration: BoxDecoration(
-                  color: topic.color,
-                  borderRadius:
-                      BorderRadius.circular(16.0), // Add rounded corners
-                  boxShadow: [
-                    BoxShadow(
-                      color: topic.color,
-                      blurRadius: 8.0,
-                    ),
-                  ]),
-              child: Center(
-                child: Text(
-                  topic.name,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget oldContextBuilder(BuildContext context, int index) => ListTile(
-        title: Text(widget.subject.topics[index].name),
-        tileColor: widget.subject.topics[index].color,
-        onTap: () {
-          print("TODO -> openSubjectScreen..");
-        },
-        onLongPress: () {
-          print("TODO -> AskToDeleteSubject");
-        },
-      );
+  // Widget oldContextBuilder(BuildContext context, int index) => ListTile(
+  //       title: Text(widget.subject.topics[index].name),
+  //       tileColor: widget.subject.topics[index].color,
+  //       onTap: () {
+  //         print("TODO -> openSubjectScreen..");
+  //       },
+  //       onLongPress: () {
+  //         print("TODO -> AskToDeleteSubject");
+  //       },
+  //     );
 
   void _addNewTopic() async {
     String? newSubjectName = await _showAddItemDialog();
@@ -123,7 +75,6 @@ class _SubjectPageState extends State<SubjectPage> {
 
   Future _editSubject(int index) async {
     Topic subject = widget.subject.topics[index];
-
     await showDialog(
       context: context,
       builder: (context) {
@@ -135,6 +86,10 @@ class _SubjectPageState extends State<SubjectPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   EditableTextWidget(
+                    textStyle: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
                     initialText: subject.name,
                     onTextSaved: (name) {
                       subject.setName(name);
@@ -207,5 +162,63 @@ class _SubjectPageState extends State<SubjectPage> {
       },
     );
     return subjectName;
+  }
+
+  Widget contextBuilder(BuildContext context, int index) {
+    final topic = widget.subject.topics[index];
+    return AnimationConfiguration.staggeredGrid(
+      columnCount: columnCount,
+      position: index,
+      duration: const Duration(milliseconds: 375),
+      child: ScaleAnimation(
+        scale: 0.5,
+        child: FadeInAnimation(
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                CustomPageTransitionAnimation(
+                  TopicPage(
+                    parentSubject: widget.subject,
+                    topic: topic,
+                  ),
+                  const Alignment(0, 0),
+                ),
+              );
+            },
+            onLongPress: () {
+              _editSubject(index);
+            },
+            child: Hero(
+              tag: "topicContainerHero:$index",
+              child: AnimatedContainer(
+                height: 100,
+                duration: const Duration(milliseconds: 375),
+                padding: const EdgeInsets.all(8.0), // Add padding
+                margin: const EdgeInsets.all(08.0),
+                decoration: BoxDecoration(
+                    color: topic.color,
+                    borderRadius:
+                        BorderRadius.circular(16.0), // Add rounded corners
+                    boxShadow: [
+                      BoxShadow(
+                        color: topic.color,
+                        blurRadius: 8.0,
+                      ),
+                    ]),
+                child: Center(
+                  child: Text(
+                    topic.name,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

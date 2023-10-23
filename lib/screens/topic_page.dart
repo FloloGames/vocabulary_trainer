@@ -4,13 +4,17 @@ import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
 import 'package:vocabulary_trainer/screens/study_card_editor_page.dart';
-import 'package:vocabulary_trainer/widgets/EditableTextWidget.dart';
+import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class TopicPage extends StatefulWidget {
   Subject parentSubject;
   Topic topic;
-  TopicPage({super.key, required this.topic, required this.parentSubject});
+  TopicPage({
+    super.key,
+    required this.topic,
+    required this.parentSubject,
+  });
 
   @override
   State<TopicPage> createState() => _TopicPageState();
@@ -127,6 +131,10 @@ class _TopicPageState extends State<TopicPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   EditableTextWidget(
+                    textStyle: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
                     initialText: studyCard.name,
                     onTextSaved: (name) {
                       studyCard.setName(name);
