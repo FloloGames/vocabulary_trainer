@@ -1,19 +1,34 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+
 abstract class LearningObject {
-  double posX = 0;
-  double posY = 0;
+  Offset offset;
+  Paint paint;
+  LearningObject(this.offset, this.paint);
 
-  LearningObject(this.posX, this.posY);
-
-  void drawObject();
+  void drawObject(Canvas canvas);
 }
 
-class TextObject extends LearningObject {
-  String text = "text";
+// class TextObject extends LearningObject {
+//   String text = "text";
 
-  TextObject(this.text, double posX, double posY) : super(posX, posY);
+//   TextObject(this.text, Offset offset) : super(offset);
+
+//   @override
+//   void drawObject(Canvas canvas, Paint paint) {}
+// }
+
+class LineObject extends LearningObject {
+  List<Offset> points;
+
+  LineObject(this.points, super.offset, super.paint);
 
   @override
-  void drawObject() {
-    // TODO: implement drawObject
+  void drawObject(Canvas canvas) {
+    canvas.drawPoints(PointMode.points, points, paint);
+    // for (int i = 0; i < points.length - 1; i++) {
+    //   canvas.drawLine(points[i], points[i + 1], paint);
+    // }
   }
 }
