@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:vocabulary_trainer/code_behind/pair.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
+import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
 import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
 import 'package:vocabulary_trainer/screens/topic_page.dart';
@@ -23,6 +25,12 @@ class _SubjectPageState extends State<SubjectPage> {
   static const columnCount = 3;
 
   @override
+  void initState() {
+    super.initState();
+    SubjectManager.loadTopics(widget.subject);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -36,19 +44,23 @@ class _SubjectPageState extends State<SubjectPage> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: GridView.count(
-          childAspectRatio: 1.0,
-          padding: const EdgeInsets.all(8.0),
-          crossAxisCount: columnCount,
-          children: List.generate(
-            widget.subject.topics.length,
-            (int index) {
-              return contextBuilder(context, index);
-            },
-          ),
-        ),
-      ),
+      body: StreamBuilder<Pair<Subject, Topic>>(
+          stream: SubjectManager.topicStream,
+          builder: (context, snapshot) {
+            return SafeArea(
+              child: GridView.count(
+                childAspectRatio: 1.0,
+                padding: const EdgeInsets.all(8.0),
+                crossAxisCount: columnCount,
+                children: List.generate(
+                  widget.subject.topics.length,
+                  (int index) {
+                    return contextBuilder(context, index);
+                  },
+                ),
+              ),
+            );
+          }),
     );
   }
 
@@ -64,17 +76,24 @@ class _SubjectPageState extends State<SubjectPage> {
   //     );
 
   void _addNewTopic() async {
-    String? newSubjectName = await _showAddItemDialog();
+    String? newTopicName = await _showAddItemDialog();
 
-    if (newSubjectName == null) return;
+    if (newTopicName == null) return;
 
-    widget.subject.topics.add(Topic(name: newSubjectName));
+    if (widget.subject.topics.any((element) => element.name == newTopicName)) {
+      //TODO: Show pop up..
+      return;
+    }
+
+    SubjectManager.addTopic(widget.subject, Topic(name: newTopicName));
 
     setState(() {});
   }
 
   Future _editSubject(int index) async {
-    Topic subject = widget.subject.topics[index];
+    Topic topic = widget.subject.topics[index];
+    String newTopicName = topic.name;
+    bool deleted = false;
     await showDialog(
       context: context,
       builder: (context) {
@@ -90,26 +109,26 @@ class _SubjectPageState extends State<SubjectPage> {
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
-                    initialText: subject.name,
+                    initialText: topic.name,
                     onTextSaved: (name) {
-                      subject.setName(name);
-                      setState(() {});
+                      newTopicName = name;
                     },
                   ),
                   const SizedBox(
                     height: 16.0,
                   ),
                   HueRingPicker(
-                    pickerColor: subject.color,
+                    pickerColor: topic.color,
                     onColorChanged: (value) {
-                      subject.setColor(value);
+                      topic.setColor(value);
                       setState(() {});
                     },
                   ),
                   TextButton(
                     onPressed: () {
-                      widget.subject.topics.removeAt(index);
+                      SubjectManager.removeTopicAt(widget.subject, index);
                       setState(() {});
+                      deleted = true;
                       Navigator.of(context).pop();
                     },
                     child: const Text(
@@ -127,6 +146,23 @@ class _SubjectPageState extends State<SubjectPage> {
         );
       },
     );
+
+    if (deleted) {
+      setState(() {});
+      return;
+    }
+
+    if (newTopicName == topic.name) {
+      SubjectManager.saveTopicAt(widget.subject, index);
+    } else {
+      if (widget.subject.topics
+          .any((element) => element.name == newTopicName)) {
+        //TODO: Show pop up..
+        return;
+      }
+      SubjectManager.renameTopicAt(widget.subject, index, newTopicName);
+    }
+    setState(() {});
   }
 
   Future<String?> _showAddItemDialog() async {

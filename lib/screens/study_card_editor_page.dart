@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flip_card/flip_card.dart';
+import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
@@ -47,48 +48,43 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
     Colors.black
   ];
 
-  late PictureRecorder recorder;
-  Canvas? canvas;
+  // late PictureRecorder recorder;
+  // Canvas? canvas;
 
-  final GlobalKey _globalKey = GlobalKey();
-  List<LearningObject> _learningObjects = [];
-  final _learningObjectStream = BehaviorSubject<List<LearningObject>>();
+  final FlipCardController _flipCardController = FlipCardController();
+  // List<LearningObject> _learningObjects = [];
+  // final _learningObjectStream = BehaviorSubject<List<LearningObject>>();
 
-  LearningObject? _currentLearningObject = null;
+  // LearningObject? _currentLearningObject = null;
 
   @override
   void initState() {
     super.initState();
-    recorder = PictureRecorder();
+    // recorder = PictureRecorder();
   }
 
   @override
   void dispose() {
-    _learningObjectStream.close();
+    // _learningObjectStream.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    canvas ??= Canvas(
-      recorder,
-      Rect.fromPoints(
-          const Offset(0, 0), Offset(width * 0.8, width * 0.8 * 6 / 4)),
-    );
+    // canvas ??= Canvas(
+    //   recorder,
+    //   Rect.fromPoints(
+    //       const Offset(0, 0), Offset(width * 0.8, width * 0.8 * 6 / 4)),
+    // );
     return Scaffold(
       resizeToAvoidBottomInset:
           false, // Prevents automatic resizing when the keyboard appears.
       appBar: AppBar(
         shadowColor: const Color.fromARGB(127, 127, 127, 127),
         backgroundColor: const Color.fromARGB(127, 127, 127, 127),
-        title: EditableTextWidget(
-          preText: "${widget.parentTopic.name} / ",
-          initialText: widget.studyCard.name,
-          onTextSaved: (text) {
-            widget.studyCard.setName(text);
-            setState(() {});
-          },
+        title: Text(
+          "${widget.parentTopic.name} / create Study Card",
         ),
         actions: const [
           // IconButton(
@@ -97,7 +93,7 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
           // ),
         ],
       ),
-      bottomNavigationBar: _bottomNavigationBar(context),
+      // bottomNavigationBar: _bottomNavigationBar(context),
       body: _body(context),
     );
   }
@@ -123,57 +119,56 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
               minScale: 0.5,
               maxScale: 4,
               child: GestureDetector(
-                onPanStart: (details) {
-                  RenderBox? renderBox = _globalKey.currentContext
-                      ?.findRenderObject() as RenderBox;
-
-                  Offset point =
-                      renderBox.globalToLocal(details.globalPosition);
-
-                  final Paint paint = Paint()
-                    ..color = selectedColor.withAlpha((opacity * 255).toInt())
-                    ..strokeCap = StrokeCap.round
-                    ..strokeWidth = strokeWidth;
-
-                  _currentLearningObject =
-                      LineObject([point], const Offset(0, 0), paint);
-
-                  _learningObjects.add(_currentLearningObject!);
-
-                  _learningObjectStream.add(_learningObjects);
+                onLongPress: () {
+                  _flipCardController.toggleCard();
                 },
-                onPanUpdate: (details) {
-                  RenderBox? renderBox = _globalKey.currentContext
-                      ?.findRenderObject() as RenderBox;
-
-                  Offset point =
-                      renderBox.globalToLocal(details.globalPosition);
-
-                  if (_currentLearningObject == null) return;
-
-                  (_currentLearningObject as LineObject).points.add(point);
-
-                  _learningObjectStream.add(_learningObjects);
-                },
-                onPanEnd: (details) {
-                  _currentLearningObject = null;
-                },
-                child: Container(
-                  margin: containerMargin,
-                  color: const Color.fromARGB(255, 255, 255, 255),
-                  width: width * 0.8,
-                  height: width * 0.8 * 6 / 4,
-                  child: StreamBuilder<List<LearningObject>>(
-                      key: _globalKey,
-                      stream: _learningObjectStream,
-                      builder: (context, snapshot) {
-                        return CustomPaint(
-                          foregroundPainter: StudyCardPainter(
-                              snapshot.data == null
-                                  ? []
-                                  : snapshot.data as List<LearningObject>),
-                        );
-                      }),
+                // onDoubleTap: () {
+                //   print("doubleTap");
+                // },
+                child: FlipCard(
+                  controller: _flipCardController,
+                  flipOnTouch: false,
+                  front: Container(
+                    margin: containerMargin,
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    width: width * 0.8,
+                    height: width * 0.8 * 6 / 4,
+                    child: Center(
+                      child: EditableTextWidget(
+                        preText: "",
+                        initialText: (widget.studyCard.questionLearnObjects[0]
+                                as TextObject)
+                            .text,
+                        textStyle: const TextStyle(color: Colors.black),
+                        onTextSaved: (text) {
+                          (widget.studyCard.questionLearnObjects[0]
+                                  as TextObject)
+                              .text = text;
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ),
+                  back: Container(
+                    margin: containerMargin,
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    width: width * 0.8,
+                    height: width * 0.8 * 6 / 4,
+                    child: Center(
+                      child: EditableTextWidget(
+                        preText: "",
+                        initialText: (widget.studyCard.awnserLearnObjects[0]
+                                as TextObject)
+                            .text,
+                        textStyle: const TextStyle(color: Colors.black),
+                        onTextSaved: (text) {
+                          (widget.studyCard.awnserLearnObjects[0] as TextObject)
+                              .text = text;
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -202,11 +197,11 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
                 children: <Widget>[
                   IconButton(
                     onPressed: () {
-                      if (_learningObjects.isEmpty) {
-                        return;
-                      }
-                      _learningObjects.removeLast();
-                      _learningObjectStream.add(_learningObjects);
+                      // if (_learningObjects.isEmpty) {
+                      //   return;
+                      // }
+                      // _learningObjects.removeLast();
+                      // _learningObjectStream.add(_learningObjects);
                     },
                     icon: const Icon(Icons.arrow_back),
                   ),
@@ -359,55 +354,6 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
       ),
     );
   }
-  // Card _cardExample(BuildContext context) {
-  //   return Card(
-  //     elevation: 0.0,
-  //     margin: const EdgeInsets.all(16.0),
-  //     color: const Color(0x00000000),
-  //     child: FlipCard(
-  //       direction: FlipDirection.HORIZONTAL,
-  //       side: CardSide.FRONT,
-  //       flipOnTouch: true,
-  //       speed: 1000,
-  //       onFlipDone: (status) async {
-  //         print("Status:");
-  //         print(status);
-  //       },
-  //       front: Expanded(
-  //         child: Container(
-  //           decoration: const BoxDecoration(
-  //             color: Color(0xFF006666),
-  //             borderRadius: BorderRadius.all(Radius.circular(8.0)),
-  //           ),
-  //           child: Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: <Widget>[
-  //               Text('Front', style: Theme.of(context).textTheme.displayLarge),
-  //               Text('Click here to flip back',
-  //                   style: Theme.of(context).textTheme.bodyLarge),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //       back: Expanded(
-  //         child: Container(
-  //           decoration: const BoxDecoration(
-  //             color: Color(0xFF006666),
-  //             borderRadius: BorderRadius.all(Radius.circular(8.0)),
-  //           ),
-  //           child: Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: <Widget>[
-  //               Text('Back', style: Theme.of(context).textTheme.displayLarge),
-  //               Text('Click here to flip front',
-  //                   style: Theme.of(context).textTheme.bodyLarge),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }
 
 class StudyCardPainter extends CustomPainter {

@@ -1,8 +1,18 @@
+// import 'package:flip_card/flip_card.dart';
+// import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
+// import 'package:rxdart/rxdart.dart';
+// import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
+// import 'package:vocabulary_trainer/code_behind/study_card.dart';
+// import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
+import 'package:vocabulary_trainer/screens/home_page.dart';
+// import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 
-import 'screens/home_page.dart';
+// AspectRatio() für Container.. aber vorher noch documentation checken weil vielleicht doch nicht das richtige lol
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -17,78 +27,120 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// class TestDrawingHomePage extends StatefulWidget {
+//   StudyCard studyCard = StudyCard();
+//   TestDrawingHomePage({super.key});
 
+//   @override
+//   State<TestDrawingHomePage> createState() => _TestDrawingHomePageState();
+// }
 
-// import 'package:flutter/material.dart';
+// class _TestDrawingHomePageState extends State<TestDrawingHomePage> {
+//   final TransformationController _transformationController =
+//       TransformationController();
+//   final FlipCardController _flipCardController = FlipCardController();
 
-// void main() => runApp(MyApp());
+//   final _learningObjectStream = BehaviorSubject<List<LearningObject>>();
+//   // List<LearningObject> _learningObjects = [];
 
-// class MyApp extends StatelessWidget {
+//   // Offset currentOffset = const Offset(0, 0);
+//   // double currentScale = 1;
+
 //   @override
 //   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Draggable Custom Painter',
-//       home: Scaffold(
-//         body: CustomPainterDraggable(),
+//     return Scaffold(
+//       resizeToAvoidBottomInset:
+//           false, // Prevents automatic resizing when the keyboard appears.
+//       appBar: AppBar(
+//         shadowColor: const Color.fromARGB(127, 127, 127, 127),
+//         backgroundColor: const Color.fromARGB(127, 127, 127, 127),
+//         title: const Text("TestTopic / create Study Card"),
+//         actions: const [
+//           // IconButton(
+//           //   onPressed: _addNewStudyCard,
+//           //   icon: const Icon(Icons.add),
+//           // ),
+//         ],
 //       ),
+//       // bottomNavigationBar: _bottomNavigationBar(context),
+//       body: _body(context),
 //     );
 //   }
-// }
 
-// class CustomPainterDraggable extends StatefulWidget {
-//   @override
-//   _CustomPainterDraggableState createState() => _CustomPainterDraggableState();
-// }
+//   Widget _body(BuildContext context) {
+//     final width = MediaQuery.of(context).size.width;
+//     // final height = MediaQuery.of(context).size.height;
 
-// class _CustomPainterDraggableState extends State<CustomPainterDraggable> {
-//   var xPos = 0.0;
-//   var yPos = 0.0;
-//   final width = 100.0;
-//   final height = 100.0;
-//   bool _dragging = false;
+//     final containerMargin = EdgeInsets.only(
+//       top: (width - width * 0.8) / 2,
+//       bottom: width - width * 0.8,
+//     );
 
-//   /// Is the point (x, y) inside the rect?
-//   bool _insideRect(double x, double y) =>
-//       x >= xPos && x <= xPos + width && y >= yPos && y <= yPos + height;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onPanStart: (details) => _dragging = _insideRect(
-//         details.globalPosition.dx,
-//         details.globalPosition.dy,
-//       ),
-//       onPanEnd: (details) {
-//         _dragging = false;
-//       },
-//       onPanUpdate: (details) {
-//         if (_dragging) {
-//           setState(() {
-//             xPos += details.delta.dx;
-//             yPos += details.delta.dy;
-//           });
-//         }
-//       },
-//       child: Container(
-//         color: Colors.white,
-//         child: CustomPaint(
-//           painter: RectanglePainter(Rect.fromLTWH(xPos, yPos, width, height)),
-//           child: Container(),
+//     return Center(
+//       child: InteractiveViewer(
+//         scaleEnabled: true,
+//         transformationController: _transformationController,
+//         panEnabled: false, // Set it to false to prevent panning.
+//         boundaryMargin: const EdgeInsets.all(80),
+//         minScale: 0.5,
+//         maxScale: 4,
+//         child: GestureDetector(
+//           onScaleStart: (details) {
+//             // print("ScaleStart");
+//           },
+//           onScaleUpdate: (details) {
+//             print("ScaleUpdate ${details.focalPointDelta}");
+//             if (details.pointerCount == 1) {
+//               return;
+//             }
+//           },
+//           onScaleEnd: (details) {},
+//           onDoubleTap: () {
+//             print("add text");
+//           },
+//           onLongPress: () {
+//             _flipCardController.toggleCard();
+//           },
+//           child: FlipCard(
+//             controller: _flipCardController,
+//             flipOnTouch: false,
+//             front: Container(
+//               margin: containerMargin,
+//               color: const Color.fromARGB(255, 255, 255, 255),
+//               width: width * 0.8,
+//               height: width * 0.8 * 6 / 4,
+//               child: const Center(
+//                 child: Text(
+//                   "FRONT",
+//                   style: TextStyle(color: Colors.black),
+//                 ),
+//               ),
+//             ),
+//             back: Container(
+//               margin: containerMargin,
+//               color: const Color.fromARGB(255, 255, 255, 255),
+//               width: width * 0.8,
+//               height: width * 0.8 * 6 / 4,
+//               child: const Center(
+//                 child: Text(
+//                   "BACK",
+//                   style: TextStyle(color: Colors.black),
+//                 ),
+//               ),
+//             ),
+//           ),
 //         ),
 //       ),
 //     );
 //   }
-// }
 
-// class RectanglePainter extends CustomPainter {
-//   RectanglePainter(this.rect);
-//   final Rect rect;
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     canvas.drawRect(rect, Paint());
-//   }
-
-//   @override
-//   bool shouldRepaint(CustomPainter oldDelegate) => true;
+//   // Widget _bottomNavigationBar(BuildContext context) {
+//   //   return Row(
+//   //     IconButton(
+//   //       onPressed: () {
+//   //         _flipCardController.
+//   //       },
+//   //     ),
+//   //   );
+//   // }
 // }

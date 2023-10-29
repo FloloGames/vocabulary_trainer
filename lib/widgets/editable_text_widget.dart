@@ -38,6 +38,7 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
       child: isEditing
           ? TextField(
               autofocus: true,
+              style: widget.textStyle,
               controller: textEditingController,
               onSubmitted: (newText) {
                 setState(() {

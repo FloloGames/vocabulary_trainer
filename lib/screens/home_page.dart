@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
+import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
 import 'package:vocabulary_trainer/screens/subject_page.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
@@ -17,11 +18,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   static const columnCount = 2;
 
-  List<Subject> subjects = [
-    Subject(name: "Deutsch"),
-    Subject(name: "Mathe"),
-    Subject(name: "Englisch")
-  ];
+  @override
+  void initState() {
+    super.initState();
+    SubjectManager.loadSubjects(loadTopics_: false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,24 +62,29 @@ class _HomePageState extends State<HomePage> {
       //         (index) => contextBuilder(context, index),
       //       )),
       // ),
-      body: SafeArea(
-        child: GridView.count(
-          childAspectRatio: 1.0,
-          padding: const EdgeInsets.all(8.0),
-          crossAxisCount: columnCount,
-          children: List.generate(
-            subjects.length,
-            (int index) {
-              return contextBuilder(context, index);
-            },
-          ),
-        ),
+      body: StreamBuilder(
+        stream: SubjectManager.subjectStream,
+        builder: (context, snapshot) {
+          return SafeArea(
+            child: GridView.count(
+              childAspectRatio: 1.0,
+              padding: const EdgeInsets.all(8.0),
+              crossAxisCount: columnCount,
+              children: List.generate(
+                SubjectManager.subjects.length,
+                (int index) {
+                  return contextBuilder(context, index);
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget contextBuilder(BuildContext context, int index) {
-    final subject = subjects[index];
+    final subject = SubjectManager.subjects[index];
     // final globalKey = subject.globalKey;
     return AnimationConfiguration.staggeredGrid(
       columnCount: columnCount,
@@ -157,13 +163,20 @@ class _HomePageState extends State<HomePage> {
 
     if (newSubjectName == null) return;
 
-    subjects.add(Subject(name: newSubjectName));
+    if (SubjectManager.subjects
+        .any((element) => element.name == newSubjectName)) {
+      //TODO: Show pop up..
+      return;
+    }
 
+    SubjectManager.addSubject(Subject(name: newSubjectName));
     setState(() {});
   }
 
   Future _editSubject(int index) async {
-    Subject subject = subjects[index];
+    Subject subject = SubjectManager.subjects[index];
+    String newSubjectName = subject.name;
+    bool deleted = false;
 
     await showDialog(
       context: context,
@@ -178,8 +191,7 @@ class _HomePageState extends State<HomePage> {
                   EditableTextWidget(
                     initialText: subject.name,
                     onTextSaved: (name) {
-                      subject.setName(name);
-                      setState(() {});
+                      newSubjectName = name;
                     },
                   ),
                   const SizedBox(
@@ -194,8 +206,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      subjects.removeAt(index);
+                      SubjectManager.removeSubjectAt(index);
                       setState(() {});
+                      deleted = true;
                       Navigator.of(context).pop();
                     },
                     child: const Text(
@@ -213,6 +226,26 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+
+    if (deleted) {
+      setState(() {});
+      return;
+    }
+
+    if (newSubjectName == subject.name) {
+      SubjectManager.saveSubjectAt(index);
+    } else {
+      //if subject.name changed
+
+      if (SubjectManager.subjects
+          .any((element) => element.name == newSubjectName)) {
+        //TODO: Show pop up..
+        return;
+      }
+
+      SubjectManager.renameSubjectAt(index, newSubjectName);
+    }
+    setState(() {});
   }
 
   Future<String?> _showAddItemDialog() async {

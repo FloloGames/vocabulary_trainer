@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
+import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
 import 'package:vocabulary_trainer/screens/study_card_editor_page.dart';
-import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class TopicPage extends StatefulWidget {
@@ -24,6 +25,12 @@ class _TopicPageState extends State<TopicPage> {
   static const columnCount = 2;
 
   @override
+  void initState() {
+    super.initState();
+    SubjectManager.loadStudyCards(widget.parentSubject, widget.topic);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -37,24 +44,28 @@ class _TopicPageState extends State<TopicPage> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: GridView.count(
-          childAspectRatio: 1.0,
-          padding: const EdgeInsets.all(8.0),
-          crossAxisCount: columnCount,
-          children: List.generate(
-            widget.topic.studyCards.length,
-            (int index) {
-              return contextBuilder(context, index);
-            },
-          ),
-        ),
-      ),
+      body: StreamBuilder<Object>(
+          stream: SubjectManager.studyCardStream,
+          builder: (context, snapshot) {
+            return SafeArea(
+              child: GridView.count(
+                childAspectRatio: 1.0,
+                padding: const EdgeInsets.all(8.0),
+                crossAxisCount: columnCount,
+                children: List.generate(
+                  widget.topic.studyCards.length,
+                  (int index) {
+                    return contextBuilder(context, index);
+                  },
+                ),
+              ),
+            );
+          }),
     );
   }
 
   Widget contextBuilder(BuildContext context, int index) {
-    final subject = widget.topic.studyCards[index];
+    final studyCard = widget.topic.studyCards[index];
     return AnimationConfiguration.staggeredGrid(
       columnCount: columnCount,
       position: index,
@@ -63,8 +74,16 @@ class _TopicPageState extends State<TopicPage> {
         scale: 0.5,
         child: FadeInAnimation(
           child: GestureDetector(
-            onTap: () {
-              print("TODO -> openSubjectScreen..");
+            onTap: () async {
+              await Navigator.of(context).push<StudyCard>(
+                MaterialPageRoute(
+                  builder: (context) => StudyCardEditor(
+                    parentTopic: widget.topic,
+                    studyCard: studyCard,
+                  ),
+                ),
+              );
+              setState(() {});
             },
             onLongPress: () {
               _editSubject(index);
@@ -83,10 +102,10 @@ class _TopicPageState extends State<TopicPage> {
                       blurRadius: 8.0,
                     ),
                   ]),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  "Image of question",
-                  style: TextStyle(
+                  (studyCard.questionLearnObjects[0] as TextObject).text,
+                  style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
@@ -100,25 +119,30 @@ class _TopicPageState extends State<TopicPage> {
   }
 
   Future<void> _addNewStudyCard() async {
-    String? newStudyCardName = await _showAddItemDialog();
+    StudyCard studyCard = StudyCard();
 
-    if (newStudyCardName == null) return;
-    StudyCard? newStudyCard =
-        await Navigator.of(context).push<StudyCard>(MaterialPageRoute(
-            builder: (context) => StudyCardEditor(
-                  parentTopic: widget.topic,
-                  studyCard: StudyCard(name: newStudyCardName),
-                )));
+    // StudyCard? newStudyCard =
+    await Navigator.of(context).push<StudyCard>(
+      MaterialPageRoute(
+        builder: (context) => StudyCardEditor(
+          parentTopic: widget.topic,
+          studyCard: studyCard,
+        ),
+      ),
+    );
 
-    if (newStudyCard == null) return;
+    if (studyCard.awnserLearnObjects.isEmpty ||
+        studyCard.questionLearnObjects.isEmpty) {
+      return;
+    }
 
-    widget.topic.studyCards.add(newStudyCard);
+    SubjectManager.addStudyCard(widget.parentSubject, widget.topic, studyCard);
 
     setState(() {});
   }
 
   Future _editSubject(int index) async {
-    StudyCard studyCard = widget.topic.studyCards[index];
+    // StudyCard studyCard = widget.topic.studyCards[index];
 
     await showDialog(
       context: context,
@@ -130,23 +154,13 @@ class _TopicPageState extends State<TopicPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  EditableTextWidget(
-                    textStyle: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    initialText: studyCard.name,
-                    onTextSaved: (name) {
-                      studyCard.setName(name);
-                      setState(() {});
-                    },
-                  ),
                   const SizedBox(
                     height: 16.0,
                   ),
                   TextButton(
                     onPressed: () {
-                      widget.topic.studyCards.removeAt(index);
+                      SubjectManager.removeStudyCardAt(
+                          widget.parentSubject, widget.topic, index);
                       setState(() {});
                       Navigator.of(context).pop();
                     },
