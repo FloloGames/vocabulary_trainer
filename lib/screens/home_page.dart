@@ -193,6 +193,10 @@ class _HomePageState extends State<HomePage> {
                     onTextSaved: (name) {
                       newSubjectName = name;
                     },
+                    textStyle: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(
                     height: 16.0,

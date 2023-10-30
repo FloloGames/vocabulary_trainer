@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:io';
 
 import 'package:flip_card/flip_card.dart';
@@ -15,14 +17,14 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 //FlipCard dimensions: 400 * 600
 
-class StudyCardEditor extends StatefulWidget {
+class StudyCardEditorPage extends StatefulWidget {
   StudyCard studyCard;
   Topic parentTopic;
-  StudyCardEditor(
+  StudyCardEditorPage(
       {super.key, required this.studyCard, required this.parentTopic});
 
   @override
-  State<StudyCardEditor> createState() => _StudyCardEditorState();
+  State<StudyCardEditorPage> createState() => _StudyCardEditorPageState();
 }
 
 enum SelectedMode {
@@ -31,7 +33,7 @@ enum SelectedMode {
   Color,
 }
 
-class _StudyCardEditorState extends State<StudyCardEditor> {
+class _StudyCardEditorPageState extends State<StudyCardEditorPage> {
   Color selectedColor = Colors.black;
   Color pickerColor = Colors.black;
   double strokeWidth = 3.0;
@@ -71,7 +73,7 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    // final width = MediaQuery.of(context).size.width;
     // canvas ??= Canvas(
     //   recorder,
     //   Rect.fromPoints(
@@ -84,7 +86,7 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
         shadowColor: const Color.fromARGB(127, 127, 127, 127),
         backgroundColor: const Color.fromARGB(127, 127, 127, 127),
         title: Text(
-          "${widget.parentTopic.name} / create Study Card",
+          "${widget.parentTopic.name} / edit Study Card",
         ),
         actions: const [
           // IconButton(
@@ -98,83 +100,104 @@ class _StudyCardEditorState extends State<StudyCardEditor> {
     );
   }
 
-  Column _body(BuildContext context) {
+  Widget _body(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     // final height = MediaQuery.of(context).size.height;
 
-    final containerMargin = EdgeInsets.only(
-      top: (width - width * 0.8) / 2,
-      bottom: width - width * 0.8,
-    );
+    // final containerMargin = EdgeInsets.only(
+    //   top: (width - width * 0.8) / 2,
+    //   bottom: width - width * 0.8,
+    // );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            InteractiveViewer(
-              panEnabled: false, // Set it to false to prevent panning.
-              boundaryMargin: const EdgeInsets.all(80),
-              minScale: 0.5,
-              maxScale: 4,
-              child: GestureDetector(
-                onLongPress: () {
-                  _flipCardController.toggleCard();
-                },
-                // onDoubleTap: () {
-                //   print("doubleTap");
-                // },
-                child: FlipCard(
-                  controller: _flipCardController,
-                  flipOnTouch: false,
-                  front: Container(
-                    margin: containerMargin,
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                    width: width * 0.8,
-                    height: width * 0.8 * 6 / 4,
-                    child: Center(
-                      child: EditableTextWidget(
-                        preText: "",
-                        initialText: (widget.studyCard.questionLearnObjects[0]
-                                as TextObject)
-                            .text,
-                        textStyle: const TextStyle(color: Colors.black),
-                        onTextSaved: (text) {
-                          (widget.studyCard.questionLearnObjects[0]
-                                  as TextObject)
-                              .text = text;
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                  ),
-                  back: Container(
-                    margin: containerMargin,
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                    width: width * 0.8,
-                    height: width * 0.8 * 6 / 4,
-                    child: Center(
-                      child: EditableTextWidget(
-                        preText: "",
-                        initialText: (widget.studyCard.awnserLearnObjects[0]
-                                as TextObject)
-                            .text,
-                        textStyle: const TextStyle(color: Colors.black),
-                        onTextSaved: (text) {
-                          (widget.studyCard.awnserLearnObjects[0] as TextObject)
-                              .text = text;
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                  ),
+    return Center(
+      // child: InteractiveViewer(
+      //   panEnabled: false, // Set it to false to prevent panning.
+      //   boundaryMargin: const EdgeInsets.all(80),
+      //   minScale: 0.5,
+      //   maxScale: 4,
+
+      child: GestureDetector(
+        onTap: () {
+          _flipCardController.toggleCard();
+        },
+        // onDoubleTap: () {
+        //   print("doubleTap");
+        // },
+        child: FlipCard(
+          controller: _flipCardController,
+          flipOnTouch: false,
+          front: Container(
+            //margin: containerMargin,
+            // color: const Color.fromARGB(255, 255, 255, 255),
+            width: width * 0.8,
+            height: width * 0.8 * 6 / 4,
+            decoration: ShapeDecoration(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              shadows: const [
+                BoxShadow(
+                  color: Colors.white,
+                  blurRadius: 18,
                 ),
+              ],
+            ),
+            child: Center(
+              child: EditableTextWidget(
+                preText: "",
+                initialText:
+                    (widget.studyCard.questionLearnObjects[0] as TextObject)
+                        .text,
+                textStyle: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 22,
+                ),
+                onTextSaved: (text) {
+                  (widget.studyCard.questionLearnObjects[0] as TextObject)
+                      .text = text;
+                  setState(() {});
+                },
               ),
             ),
-          ],
+          ),
+          back: Container(
+            // margin: containerMargin,
+            // color: const Color.fromARGB(255, 255, 255, 255),
+            width: width * 0.8,
+            height: width * 0.8 * 6 / 4,
+            decoration: ShapeDecoration(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              shadows: const [
+                BoxShadow(
+                  color: Colors.white,
+                  blurRadius: 18,
+                ),
+              ],
+            ),
+            child: Center(
+              child: EditableTextWidget(
+                preText: "",
+                initialText:
+                    (widget.studyCard.awnserLearnObjects[0] as TextObject).text,
+                textStyle: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 22,
+                ),
+                onTextSaved: (text) {
+                  (widget.studyCard.awnserLearnObjects[0] as TextObject).text =
+                      text;
+                  setState(() {});
+                },
+              ),
+            ),
+          ),
         ),
-      ],
+      ),
+      // ),
     );
   }
 

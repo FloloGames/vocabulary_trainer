@@ -14,6 +14,9 @@ class StudyCard {
     TextObject("Awnser", Offset.zero, Paint()),
   ];
 
+  //da muss ich mir noch was schlaues überlegen
+  int learningScore = 0;
+
   StudyCard();
 
   void setParamsFromJson(Map<String, dynamic> json) {
@@ -28,7 +31,7 @@ class StudyCard {
       Map<String, dynamic> objJson = obj.toJson();
 
       questionObjects.addAll({
-        "index:$i": objJson,
+        "index:$i": objJson, //TODO: man kann index: vielleicht weglassen
       });
     }
 
@@ -38,7 +41,7 @@ class StudyCard {
       Map<String, dynamic> objJson = obj.toJson();
 
       awnserObjects.addAll({
-        "index:$i": objJson,
+        "index:$i": objJson, //TODO: man kann index: vielleicht weglassen
       });
     }
 

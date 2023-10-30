@@ -11,7 +11,9 @@ import 'package:vocabulary_trainer/code_behind/topic.dart';
 
 class SubjectManager {
   // ignore: constant_identifier_names
-  static const SAVE_DIR_NAME = "subjects/";
+  static const SUBJECTS_SAVE_DIR_NAME = "subjects/";
+  static const STUDY_CARDS_SAVE_DIR_NAME =
+      "studyCardsToLearn/"; //die StudyCards die man lernen muss
   // ignore: constant_identifier_names
   static const SUBJECT_EXTENSION = ".SUB";
   // ignore: constant_identifier_names
@@ -247,7 +249,7 @@ class SubjectManager {
   static Future<Directory> getSubjectsSaveDir() async {
     final Directory appDocumentsDir =
         await path_provider.getApplicationDocumentsDirectory();
-    final saveDirPath = appDocumentsDir.path + SAVE_DIR_NAME;
+    final saveDirPath = appDocumentsDir.path + SUBJECTS_SAVE_DIR_NAME;
     final Directory saveDir = Directory(saveDirPath);
     saveDir.createSync();
 
@@ -425,36 +427,4 @@ class SubjectManager {
       currTopicDir.renameSync("${topicSaveDir.path}${currTopic.name}/");
     }
   }
-
-  // static Future<void> saveSubjects() async {
-  //   final Directory appDocumentsDir =
-  //       await path_provider.getApplicationDocumentsDirectory();
-  //   final saveDirPath = appDocumentsDir.path + SAVE_DIR_NAME;
-  //   print(saveDirPath);
-  //   final Directory saveDir = Directory(saveDirPath);
-  //   saveDir.create();
-  //   for (int i = 0; i < subjects.length; i++) {
-  //     Subject currSubject = subjects[i];
-  //     if (currSubject.syncWithFilesystem) {
-  //       continue;
-  //     }
-  //     Map<String, dynamic> json = currSubject.toJson();
-  //     File subjectFile =
-  //         File(saveDir.path + currSubject.name + SUBJECT_EXTENSION);
-  //     await subjectFile.writeAsString(jsonEncode(json));
-  //     if (currSubject.topics.isNotEmpty) {
-  //       Directory topicsDir = Directory("${saveDir.path}${currSubject.name}/");
-  //       topicsDir.create();
-  //     }
-  //     for (Topic currTopic in currSubject.topics) {
-  //       if (currTopic.syncWithFilesystem) {
-  //         continue;
-  //       }
-  //       Map<String, dynamic> json = currSubject.toJson();
-  //       File subjectFile =
-  //           File(saveDir.path + currSubject.name + SUBJECT_EXTENSION);
-  //     }
-  //     currSubject.syncWithFilesystem = true;
-  //   }
-  // }
 }

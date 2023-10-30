@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
+import 'package:vocabulary_trainer/code_behind/pair.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
 import 'package:vocabulary_trainer/screens/study_card_editor_page.dart';
+import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class TopicPage extends StatefulWidget {
@@ -66,6 +68,7 @@ class _TopicPageState extends State<TopicPage> {
 
   Widget contextBuilder(BuildContext context, int index) {
     final studyCard = widget.topic.studyCards[index];
+
     return AnimationConfiguration.staggeredGrid(
       columnCount: columnCount,
       position: index,
@@ -75,14 +78,37 @@ class _TopicPageState extends State<TopicPage> {
         child: FadeInAnimation(
           child: GestureDetector(
             onTap: () async {
+              List<Pair<Topic, StudyCard>> studyCardList = [];
+
+              studyCardList.add(Pair(widget.topic, studyCard));
+
+              for (int i = 0; i < widget.topic.studyCards.length; i++) {
+                if (i == index) {
+                  continue; //sonst ist die currstudycard zweimal drin
+                }
+                studyCardList
+                    .add(Pair(widget.topic, widget.topic.studyCards[i]));
+              }
+
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => StudyCardLearningPage(
+                    studyCardList: studyCardList,
+                  ),
+                ),
+              );
+            },
+            onDoubleTap: () async {
               await Navigator.of(context).push<StudyCard>(
                 MaterialPageRoute(
-                  builder: (context) => StudyCardEditor(
+                  builder: (context) => StudyCardEditorPage(
                     parentTopic: widget.topic,
                     studyCard: studyCard,
                   ),
                 ),
               );
+              SubjectManager.saveStudyCardAt(
+                  widget.parentSubject, widget.topic, index);
               setState(() {});
             },
             onLongPress: () {
@@ -93,7 +119,7 @@ class _TopicPageState extends State<TopicPage> {
               padding: const EdgeInsets.all(8.0), // Add padding
               margin: const EdgeInsets.all(08.0),
               decoration: BoxDecoration(
-                  color: const Color.fromARGB(127, 127, 127, 127),
+                  color: widget.topic.color,
                   borderRadius:
                       BorderRadius.circular(16.0), // Add rounded corners
                   boxShadow: const [
@@ -124,7 +150,7 @@ class _TopicPageState extends State<TopicPage> {
     // StudyCard? newStudyCard =
     await Navigator.of(context).push<StudyCard>(
       MaterialPageRoute(
-        builder: (context) => StudyCardEditor(
+        builder: (context) => StudyCardEditorPage(
           parentTopic: widget.topic,
           studyCard: studyCard,
         ),
@@ -154,6 +180,29 @@ class _TopicPageState extends State<TopicPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  TextButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+
+                      await Navigator.of(context).push<StudyCard>(
+                        MaterialPageRoute(
+                          builder: (context) => StudyCardEditorPage(
+                            parentTopic: widget.topic,
+                            studyCard: widget.topic.studyCards[index],
+                          ),
+                        ),
+                      );
+
+                      SubjectManager.saveStudyCardAt(
+                          widget.parentSubject, widget.topic, index);
+
+                      setState(() {});
+                    },
+                    child: const Text(
+                      "Edit",
+                      style: TextStyle(fontSize: 22),
+                    ),
+                  ),
                   const SizedBox(
                     height: 16.0,
                   ),
@@ -179,40 +228,5 @@ class _TopicPageState extends State<TopicPage> {
         );
       },
     );
-  }
-
-  Future<String?> _showAddItemDialog() async {
-    String? subjectName;
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String newItem = '';
-        return AlertDialog(
-          title: const Text('Add Study Card'),
-          content: TextField(
-            autofocus: true,
-            onChanged: (value) {
-              newItem = value;
-            },
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Add'),
-              onPressed: () {
-                subjectName = newItem;
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    return subjectName;
   }
 }
