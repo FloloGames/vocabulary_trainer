@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:vocabulary_trainer/code_behind/pair.dart';
+import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
+import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -70,7 +73,46 @@ class _SettingsPageState extends State<SettingsPage> {
           IgnorePointer(
             ignoring: !_openAppAfterUnlocks,
             child: TextButton(
-              onPressed: () {},
+              onPressed: () async {
+                List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
+
+                List<Pair<Subject, int>> learningTopics =
+                    SubjectManager.getLearningTopics();
+
+                for (int i = 0; i < learningTopics.length; i++) {
+                  Topic topic =
+                      learningTopics[i].first.topics[learningTopics[i].second];
+
+                  await SubjectManager.loadStudyCards(
+                      learningTopics[i].first, topic);
+
+                  for (StudyCard studyCard in topic.studyCards) {
+                    Pair3<Subject, Topic, StudyCard> pair = Pair3(
+                      learningTopics[i].first,
+                      topic,
+                      studyCard,
+                    );
+                    studyCardList.add(pair);
+                  }
+                }
+
+                studyCardList.sort(
+                  (a, b) =>
+                      a.third.learningScore.compareTo(b.third.learningScore),
+                );
+                if (studyCardList.isEmpty) {
+                  //display msg
+                  return;
+                }
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => StudyCardLearningPage(
+                      studyCardList: studyCardList,
+                    ),
+                  ),
+                );
+                setState(() {});
+              },
               child: Text(
                 "Example Screen",
                 style: TextStyle(

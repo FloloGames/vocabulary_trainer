@@ -123,6 +123,22 @@ class SubjectManager {
   //   saveFile.writeAsStringSync(saveString);
   // }
 
+  static List<Pair<Subject, int>> getLearningTopics() {
+    List<Pair<Subject, int>> learningTopics = [];
+
+    for (Subject subject in subjects) {
+      for (int i = 0; i < subject.topics.length; i++) {
+        Topic topic = subject.topics[i];
+        if (!topic.isLearningTopic) continue;
+        learningTopics.add(
+          Pair(subject, i),
+        );
+      }
+    }
+
+    return learningTopics;
+  }
+
   static void removeSubjectAt(int index) {
     Subject removedSubject = subjects.removeAt(index);
     deleteSubject(removedSubject);

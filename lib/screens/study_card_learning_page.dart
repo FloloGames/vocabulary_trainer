@@ -168,9 +168,7 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
                   ),
                   child: Center(
                     child: Text(
-                      (widget.studyCardList[currCardIndex].third
-                              .questionLearnObjects[0] as TextObject)
-                          .text,
+                      "index: ${widget.studyCardList[currCardIndex].third.index}\nscore: ${widget.studyCardList[currCardIndex].third.learningScore}\n${(widget.studyCardList[currCardIndex].third.questionLearnObjects[0] as TextObject).text}",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 22,
@@ -307,8 +305,10 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
         break;
     }
 
-    SubjectManager.saveStudyCardAt(widget.studyCardList[index].first,
-        widget.studyCardList[index].second, index);
+    SubjectManager.saveStudyCardAt(
+        widget.studyCardList[index].first,
+        widget.studyCardList[index].second,
+        widget.studyCardList[index].third.index);
   }
 
   Future<void> _nextCard(Duration delayDuration) async {
