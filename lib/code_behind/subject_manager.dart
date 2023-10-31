@@ -11,7 +11,12 @@ import 'package:vocabulary_trainer/code_behind/topic.dart';
 
 class SubjectManager {
   // ignore: constant_identifier_names
-  static const SUBJECTS_SAVE_DIR_NAME = "subjects/";
+  static const SUBJECTS_SAVE_DIR_NAME = "/subjects/";
+  // ignore: constant_identifier_names
+  static const LEARNING_TOPICS_SAVE_DIR_NAME = "/learningTopics/";
+  // ignore: constant_identifier_names
+  static const LEARNING_TOPICS_SAVE_FILE_NAME = "learningTopics.LNT";
+  // ignore: constant_identifier_names
   static const STUDY_CARDS_SAVE_DIR_NAME =
       "studyCardsToLearn/"; //die StudyCards die man lernen muss
   // ignore: constant_identifier_names
@@ -20,6 +25,9 @@ class SubjectManager {
   static const TOPIC_EXTENSION = ".TOP";
   // ignore: constant_identifier_names
   static const STUDY_CARD_EXTENSION = ".STC";
+
+  //nicht schön aber selten sollte ich nochmal überarbeiten z.B. als eine List<String> oder List<Pair<String, String>>
+  // static Map<String, Pair<Subject, Topic>> learningTopics = {};
 
   static List<Subject> subjects = [];
   // static Directory? _appDataDir = null;
@@ -33,6 +41,87 @@ class SubjectManager {
 
   static final rx.BehaviorSubject<Pair<Topic, StudyCard>> studyCardStream =
       rx.BehaviorSubject<Pair<Topic, StudyCard>>();
+
+  // static String _getLearningTopicsKey(Subject subject, Topic topic) {
+  //   return "${subject.name}/${topic.name}";
+  // }
+
+  // static void addLearningTopic(
+  //   Subject subject,
+  //   Topic topic,
+  // ) {
+  //   Pair<Subject, Topic> pair = Pair(subject, topic);
+  //   learningTopics[_getLearningTopicsKey(subject, topic)] = pair;
+  //   saveLearningTopics();
+  // }
+
+  // static void removeLearningTopicAt(Subject subject, Topic topic) {
+  //   // Pair<Subject, Topic>? pair =
+  //   learningTopics.remove(_getLearningTopicsKey(subject, topic));
+
+  //   saveLearningTopics();
+  // }
+
+  // static Map<String, dynamic> _getLearningTopicsMapAsJson() {
+  //   Map<String, dynamic> json = {};
+
+  //   for (String key in learningTopics.keys) {
+  //     Pair<Subject, Topic>? pair = learningTopics[key];
+  //     if (pair == null) continue;
+
+  //     json.addAll(
+  //       {
+  //         key: {
+  //           "first": pair.first.name,
+  //           "second": pair.second.name,
+  //         },
+  //       },
+  //     );
+  //   }
+
+  //   return json;
+  // }
+
+  // static Future<void> loadLearningTopics() async {
+  //   final saveDir = await getLearningTopicsSaveDir();
+
+  //   File saveFile = File(saveDir.path + LEARNING_TOPICS_SAVE_FILE_NAME);
+
+  //   if (!saveFile.existsSync()) {
+  //     return;
+  //   }
+
+  //   String loadString = saveFile.readAsStringSync();
+
+  //   Map<String, dynamic> json = jsonDecode(loadString);
+
+  //   _setLearningTopicsFromJson(json);
+  // }
+
+  // static void _setLearningTopicsFromJson(Map<String, dynamic> json) {
+  //   learningTopics = {};
+
+  //   for (String key in json.keys) {
+  //     Map<String, dynamic> pairJson = json[key];
+  //     Pair<Subject, Topic> pair = Pair(
+  //       Subject(name: pairJson["first"]),
+  //       Topic(name: pairJson["second"]),
+  //     );
+  //     learningTopics.addAll({key: pair});
+  //   }
+  // }
+
+  // static Future<void> saveLearningTopics() async {
+  //   final saveDir = await getLearningTopicsSaveDir();
+
+  //   File saveFile = File(saveDir.path + LEARNING_TOPICS_SAVE_FILE_NAME);
+
+  //   Map<String, dynamic> json = _getLearningTopicsMapAsJson();
+
+  //   String saveString = jsonEncode(json);
+
+  //   saveFile.writeAsStringSync(saveString);
+  // }
 
   static void removeSubjectAt(int index) {
     Subject removedSubject = subjects.removeAt(index);
@@ -114,15 +203,7 @@ class SubjectManager {
           loadingSubjectMap[currDirName] = Subject(name: currDirName);
         }
 
-        loadTopics(loadingSubjectMap[currDirName]!);
-
-        print(currDirName);
-        // Subject subject = subjects.firstWhere((element) => element.name == currDirName,  orElse: () {
-        //   return Subject(name: "NULL");
-        // },);
-        // if(){
-
-        // }
+        await loadTopics(loadingSubjectMap[currDirName]!);
       } else if (currFileEntity is File) {
         File currFile = currFileEntity;
         final currFileName = path.basename(currFile.path);
@@ -245,6 +326,17 @@ class SubjectManager {
         }
       }
     }
+  }
+
+  static Future<Directory> getLearningTopicsSaveDir() async {
+    final Directory appDocumentsDir =
+        await path_provider.getApplicationDocumentsDirectory();
+    final saveDirPath = appDocumentsDir.path + LEARNING_TOPICS_SAVE_DIR_NAME;
+    final Directory saveDir = Directory(saveDirPath);
+
+    saveDir.createSync();
+
+    return saveDir;
   }
 
   static Future<Directory> getSubjectsSaveDir() async {
