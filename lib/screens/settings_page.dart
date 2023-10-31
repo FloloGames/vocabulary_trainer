@@ -78,10 +78,11 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           TextButton(
             onPressed: () {},
-            child: const Text(
+            child: Text(
               "Example Screen",
               style: TextStyle(
                 fontSize: 18,
+                color: _openAppAfterUnlocks ? Colors.blue : Colors.grey,
               ),
             ),
           ),
