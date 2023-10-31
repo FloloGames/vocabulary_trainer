@@ -5,6 +5,7 @@ import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
 import 'package:vocabulary_trainer/screens/hero_dialog_route.dart';
+import 'package:vocabulary_trainer/screens/settings_page.dart';
 import 'package:vocabulary_trainer/screens/subject_page.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 // import 'package:reorderables/reorderables.dart';
@@ -34,6 +35,17 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             onPressed: _addNewSubject,
             icon: const Icon(Icons.add),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                CustomPageTransitionAnimation(
+                  const SettingsPage(),
+                  const Alignment(.9, -0.9),
+                ),
+              );
+            },
+            icon: const Icon(Icons.settings),
           ),
         ],
       ),
