@@ -226,7 +226,8 @@ class SubjectManager {
             currFileName.replaceAll(STUDY_CARD_EXTENSION, "");
 
         if (loadingStudyCardsMap[currStudyCardName] == null) {
-          loadingStudyCardsMap[currStudyCardName] = StudyCard();
+          loadingStudyCardsMap[currStudyCardName] =
+              StudyCard(int.parse(currStudyCardName));
         }
 
         String json = await currFile.readAsString();
@@ -359,8 +360,48 @@ class SubjectManager {
       if (studyCardFile.existsSync()) {
         studyCardFile.deleteSync();
       }
+      //da sich der Index ändert wenn man eine StudyCard löscht müssen wir neue zuweisen und die jeweiligen Datein umbenennen
+      for (int i = index; i < topic.studyCards.length; i++) {
+        await setNewStudyCardIndex(subject, topic, i, i,
+            deleteOldFile: i == topic.studyCards.length - 1);
+      }
     } catch (e) {
       print(e);
+    }
+  }
+
+  static Future<void> setNewStudyCardIndex(
+    Subject subject,
+    Topic topic,
+    int oldIndex,
+    int newIndex, {
+    bool deleteOldFile = true,
+  }) async {
+    int oldFileIndex = topic.studyCards[oldIndex].index;
+
+    topic.studyCards[oldIndex].index = newIndex;
+
+    StudyCard studyCard = topic.studyCards[oldIndex];
+
+    //copy file from old index to new index
+    //delete old index file
+
+    final Directory saveDir = await getStudyCardDir(subject, topic);
+
+    Map<String, dynamic> json = studyCard.toJson();
+
+    File studyCardFile =
+        File(saveDir.path + newIndex.toString() + STUDY_CARD_EXTENSION);
+
+    studyCardFile.writeAsStringSync(jsonEncode(json));
+
+    if (deleteOldFile) {
+      File oldStudyCardFile =
+          File(saveDir.path + oldFileIndex.toString() + STUDY_CARD_EXTENSION);
+
+      if (oldStudyCardFile.existsSync()) {
+        oldStudyCardFile.deleteSync();
+      }
     }
   }
 

@@ -7,7 +7,7 @@ import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 
 class TestDrawingHomePage extends StatefulWidget {
-  StudyCard studyCard = StudyCard();
+  StudyCard studyCard = StudyCard(-1);
   TestDrawingHomePage({super.key});
 
   @override

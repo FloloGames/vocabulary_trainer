@@ -3,9 +3,20 @@ import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
 
 class StudyCard {
   // ignore: constant_identifier_names
+  static const int KNOWN_VALUE = 1;
+  // ignore: constant_identifier_names
+  static const int NOT_SURE_VALUE = 0;
+  // ignore: constant_identifier_names
+  static const int UNKNOWN_VALUE = -1;
+  // ignore: constant_identifier_names
+  static const int EZKNOWN_VALUE = 2; //oder 3 oder so
+
+  // ignore: constant_identifier_names
   static const QUESTION_LEARN_OBJECTS_KEY = "question_learn_objects_key";
   // ignore: constant_identifier_names
   static const AWNSER_LEARN_OBJECTS_KEY = "awnser_learn_objects_key";
+  // ignore: constant_identifier_names
+  static const SCORE_KEY = "score_key";
 
   List<LearningObject> questionLearnObjects = [
     TextObject("Question", Offset.zero, Paint()),
@@ -16,12 +27,14 @@ class StudyCard {
 
   //da muss ich mir noch was schlaues überlegen
   int learningScore = 0;
+  int index = -1; //needed to save StudyCard
 
-  StudyCard();
+  StudyCard(this.index);
 
   void setParamsFromJson(Map<String, dynamic> json) {
     _setQuestionLearnObjectsFromJson(json[QUESTION_LEARN_OBJECTS_KEY]);
     _setAwnserLearnObjectsFromJson(json[AWNSER_LEARN_OBJECTS_KEY]);
+    learningScore = int.parse(json[SCORE_KEY]);
   }
 
   Map<String, dynamic> toJson() {
@@ -48,6 +61,7 @@ class StudyCard {
     return {
       QUESTION_LEARN_OBJECTS_KEY: questionLearnObjects,
       AWNSER_LEARN_OBJECTS_KEY: awnserLearnObjects,
+      SCORE_KEY: learningScore.toString(),
     };
   }
 
@@ -79,5 +93,21 @@ class StudyCard {
           break;
       }
     }
+  }
+
+  void addKnownScore() {
+    learningScore += KNOWN_VALUE;
+  }
+
+  void addUnknownScore() {
+    learningScore += UNKNOWN_VALUE;
+  }
+
+  void addNotSureScore() {
+    learningScore += NOT_SURE_VALUE;
+  }
+
+  void addEzknownScore() {
+    learningScore += EZKNOWN_VALUE;
   }
 }

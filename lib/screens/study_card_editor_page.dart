@@ -83,8 +83,10 @@ class _StudyCardEditorPageState extends State<StudyCardEditorPage> {
       resizeToAvoidBottomInset:
           false, // Prevents automatic resizing when the keyboard appears.
       appBar: AppBar(
-        shadowColor: const Color.fromARGB(127, 127, 127, 127),
-        backgroundColor: const Color.fromARGB(127, 127, 127, 127),
+        shadowColor: widget
+            .parentTopic.color, //const Color.fromARGB(127, 127, 127, 127),
+        backgroundColor: widget
+            .parentTopic.color, //const Color.fromARGB(127, 127, 127, 127),
         title: Text(
           "${widget.parentTopic.name} / edit Study Card",
         ),

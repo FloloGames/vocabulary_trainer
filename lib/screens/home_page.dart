@@ -4,6 +4,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
+import 'package:vocabulary_trainer/screens/hero_dialog_route.dart';
 import 'package:vocabulary_trainer/screens/subject_page.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 // import 'package:reorderables/reorderables.dart';
@@ -85,6 +86,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget contextBuilder(BuildContext context, int index) {
     final subject = SubjectManager.subjects[index];
+
     // final globalKey = subject.globalKey;
     return AnimationConfiguration.staggeredGrid(
       columnCount: columnCount,
@@ -308,4 +310,8 @@ class _HomePageState extends State<HomePage> {
       },
     );
   }
+
+  // String getSubjectHeroString(int index) {
+  //   return "subjectContainer:$index";
+  // }
 }

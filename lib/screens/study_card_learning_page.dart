@@ -1,28 +1,22 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 // import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
 import 'package:vocabulary_trainer/code_behind/pair.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/study_card_provider.dart';
+import 'package:vocabulary_trainer/code_behind/subject.dart';
+import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
-import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
-
-import 'dart:ui';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-
 //FlipCard dimensions: 400 * 600
 
 class StudyCardLearningPage extends StatefulWidget {
-  List<Pair<Topic, StudyCard>> studyCardList = [];
+  List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
 
   StudyCardLearningPage({super.key, required this.studyCardList});
 
@@ -67,10 +61,12 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
       resizeToAvoidBottomInset:
           false, // Prevents automatic resizing when the keyboard appears.
       appBar: AppBar(
-        shadowColor: const Color.fromARGB(127, 127, 127, 127),
-        backgroundColor: const Color.fromARGB(127, 127, 127, 127),
+        shadowColor: widget.studyCardList[currCardIndex].second
+            .color, //const Color.fromARGB(127, 127, 127, 127),
+        backgroundColor: widget.studyCardList[currCardIndex].second
+            .color, //const Color.fromARGB(127, 127, 127, 127),
         title: Text(
-          widget.studyCardList[currCardIndex].first.name,
+          "${widget.studyCardList[currCardIndex].first.name}/${widget.studyCardList[currCardIndex].second.name}",
         ),
         actions: const [
           //TODO: zurück oder so
@@ -106,6 +102,8 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
 
           if (_studyCardProvider.status != StudyCardStatus.none &&
               !_studyCardProvider.isDragging) {
+            _updateStudyCardLearningScore(
+                currCardIndex, _studyCardProvider.status);
             _studyCardProvider.resetStatus();
             _nextCard(const Duration(milliseconds: 200));
           }
@@ -161,16 +159,16 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    shadows: const [
+                    shadows: [
                       BoxShadow(
-                        color: Colors.white,
+                        color: studyCardColor,
                         blurRadius: 18,
                       ),
                     ],
                   ),
                   child: Center(
                     child: Text(
-                      (widget.studyCardList[currCardIndex].second
+                      (widget.studyCardList[currCardIndex].third
                               .questionLearnObjects[0] as TextObject)
                           .text,
                       style: const TextStyle(
@@ -180,24 +178,25 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
                     ),
                   ),
                 ),
-                back: Container(
+                back: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   width: width * 0.8,
                   height: width * 0.8 * 6 / 4,
                   decoration: ShapeDecoration(
-                    color: Colors.white,
+                    color: studyCardColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    shadows: const [
+                    shadows: [
                       BoxShadow(
-                        color: Colors.white,
+                        color: studyCardColor,
                         blurRadius: 18,
                       ),
                     ],
                   ),
                   child: Center(
                     child: Text(
-                      (widget.studyCardList[currCardIndex].second
+                      (widget.studyCardList[currCardIndex].third
                               .awnserLearnObjects[0] as TextObject)
                           .text,
                       style: const TextStyle(
@@ -275,8 +274,8 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
       ),
       child: Center(
         child: Text(
-          (widget.studyCardList[currCardIndex + 1].second
-                  .questionLearnObjects[0] as TextObject)
+          (widget.studyCardList[currCardIndex + 1].third.questionLearnObjects[0]
+                  as TextObject)
               .text,
           style: const TextStyle(
             color: Colors.black,
@@ -285,6 +284,31 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _updateStudyCardLearningScore(
+      int index, StudyCardStatus status) async {
+    StudyCard studyCard = widget.studyCardList[index].third;
+
+    switch (status) {
+      case StudyCardStatus.known:
+        studyCard.addKnownScore();
+        break;
+      case StudyCardStatus.unknown:
+        studyCard.addUnknownScore();
+        break;
+      case StudyCardStatus.notSure:
+        studyCard.addNotSureScore();
+        break;
+      case StudyCardStatus.ezKnown:
+        studyCard.addEzknownScore();
+        break;
+      default:
+        break;
+    }
+
+    SubjectManager.saveStudyCardAt(widget.studyCardList[index].first,
+        widget.studyCardList[index].second, index);
   }
 
   Future<void> _nextCard(Duration delayDuration) async {

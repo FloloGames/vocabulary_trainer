@@ -78,16 +78,17 @@ class _TopicPageState extends State<TopicPage> {
         child: FadeInAnimation(
           child: GestureDetector(
             onTap: () async {
-              List<Pair<Topic, StudyCard>> studyCardList = [];
+              List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
 
-              studyCardList.add(Pair(widget.topic, studyCard));
+              studyCardList
+                  .add(Pair3(widget.parentSubject, widget.topic, studyCard));
 
               for (int i = 0; i < widget.topic.studyCards.length; i++) {
                 if (i == index) {
                   continue; //sonst ist die currstudycard zweimal drin
                 }
-                studyCardList
-                    .add(Pair(widget.topic, widget.topic.studyCards[i]));
+                studyCardList.add(Pair3(widget.parentSubject, widget.topic,
+                    widget.topic.studyCards[i]));
               }
 
               await Navigator.of(context).push(
@@ -145,7 +146,7 @@ class _TopicPageState extends State<TopicPage> {
   }
 
   Future<void> _addNewStudyCard() async {
-    StudyCard studyCard = StudyCard();
+    StudyCard studyCard = StudyCard(widget.topic.studyCards.length);
 
     // StudyCard? newStudyCard =
     await Navigator.of(context).push<StudyCard>(
