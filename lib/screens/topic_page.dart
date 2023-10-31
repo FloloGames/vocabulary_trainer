@@ -80,9 +80,6 @@ class _TopicPageState extends State<TopicPage> {
             onTap: () async {
               List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
 
-              studyCardList
-                  .add(Pair3(widget.parentSubject, widget.topic, studyCard));
-
               for (int i = 0; i < widget.topic.studyCards.length; i++) {
                 if (i == index) {
                   continue; //sonst ist die currstudycard zweimal drin
@@ -91,6 +88,14 @@ class _TopicPageState extends State<TopicPage> {
                     widget.topic.studyCards[i]));
               }
 
+              studyCardList.sort(
+                (a, b) =>
+                    a.third.learningScore.compareTo(b.third.learningScore),
+              );
+
+              studyCardList.insert(
+                  0, Pair3(widget.parentSubject, widget.topic, studyCard));
+
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => StudyCardLearningPage(
@@ -98,6 +103,7 @@ class _TopicPageState extends State<TopicPage> {
                   ),
                 ),
               );
+              setState(() {});
             },
             onDoubleTap: () async {
               await Navigator.of(context).push<StudyCard>(
@@ -131,7 +137,7 @@ class _TopicPageState extends State<TopicPage> {
                   ]),
               child: Center(
                 child: Text(
-                  (studyCard.questionLearnObjects[0] as TextObject).text,
+                  "i: ${studyCard.index} | ls: ${studyCard.learningScore}\n${(studyCard.questionLearnObjects[0] as TextObject).text}",
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
