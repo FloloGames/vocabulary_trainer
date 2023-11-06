@@ -1,6 +1,0 @@
-package com.flologames.vocabulary_trainer
-
-import io.flutter.embedding.android.FlutterActivity
-
-class MainActivity: FlutterActivity() {
-}

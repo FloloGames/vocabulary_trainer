@@ -1,4 +1,4 @@
-package com.example.count_unlocks.host;
+package com.flologames.vocabulary_trainer;
 
 
 import android.content.BroadcastReceiver;

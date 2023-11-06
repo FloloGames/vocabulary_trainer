@@ -1,12 +1,12 @@
-package com.flologames.vocabulary_trainer
+package com.flologames.vocabulary_trainer;
 
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.widget.Toast;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import java.util.Map;
@@ -17,6 +17,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
+@Keep
 public class MainActivity extends FlutterActivity implements MethodChannel.MethodCallHandler {
     private final String testChannelName = "testChannel";
     private final String testMethodName = "testMethod";
