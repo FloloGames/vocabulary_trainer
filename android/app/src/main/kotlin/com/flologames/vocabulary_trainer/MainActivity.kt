@@ -1,4 +1,4 @@
-package com.example.vocabulary_trainer
+package com.flologames.vocabulary_trainer
 
 import io.flutter.embedding.android.FlutterActivity
 
