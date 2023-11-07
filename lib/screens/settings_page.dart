@@ -49,109 +49,116 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: ListView(
-        children: [
-          ListTile(
-            onTap: () {
-              //set unlock count
-            },
-            title: Text(
-              "Open app after ${_androidCountUnlocksManager.unlockCountToOpenApp} unlocks",
-              style: const TextStyle(
-                fontSize: 18,
-              ),
-            ),
-            trailing: Switch(
-              value: _openAppAfterUnlocks,
-              onChanged: (value) async {
-                if (value) {
-                  bool? startedForegroundService =
-                      await _androidCountUnlocksManager
-                          .startForegroundService();
-                  startedForegroundService ??= false;
-                  _openAppAfterUnlocks = startedForegroundService;
-                } else {
-                  await _androidCountUnlocksManager.endForegroundService();
-                  _openAppAfterUnlocks = false;
-                }
-                if (!_openAppAfterUnlocks) {
-                  _expansionTileController.collapse();
-                }
-                setState(() {});
-              },
-            ),
-          ),
-          IgnorePointer(
-            ignoring: !_openAppAfterUnlocks,
-            child: ExpansionTile(
-              controller: _expansionTileController,
-              title: Text(
-                "Selected Topics to learn:",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: _openAppAfterUnlocks ? Colors.white : Colors.grey,
-                ),
-              ),
-              children: List.generate(
-                SubjectManager.subjects.length,
-                (index) => _listSubjectExpansionTileBuilder(index),
-              ),
-            ),
-          ),
-          IgnorePointer(
-            ignoring: !_openAppAfterUnlocks,
-            child: TextButton(
-              onPressed: () async {
-                List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
-
-                List<Pair<Subject, int>> learningTopics =
-                    SubjectManager.getLearningTopics();
-
-                for (int i = 0; i < learningTopics.length; i++) {
-                  Topic topic =
-                      learningTopics[i].first.topics[learningTopics[i].second];
-
-                  await SubjectManager.loadStudyCards(
-                      learningTopics[i].first, topic);
-
-                  for (StudyCard studyCard in topic.studyCards) {
-                    Pair3<Subject, Topic, StudyCard> pair = Pair3(
-                      learningTopics[i].first,
-                      topic,
-                      studyCard,
-                    );
-                    studyCardList.add(pair);
-                  }
-                }
-
-                studyCardList.sort(
-                  (a, b) =>
-                      a.third.learningScore.compareTo(b.third.learningScore),
-                );
-                if (studyCardList.isEmpty) {
-                  //display msg
-                  return;
-                }
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => StudyCardLearningPage(
-                      studyCardList: studyCardList,
+      body: StreamBuilder(
+          stream: SubjectManager.topicStream,
+          builder: (context, snapshot) {
+            return ListView(
+              children: [
+                ListTile(
+                  onTap: () {
+                    //set unlock count
+                  },
+                  title: Text(
+                    "Open app after ${_androidCountUnlocksManager.unlockCountToOpenApp} unlocks",
+                    style: const TextStyle(
+                      fontSize: 18,
                     ),
                   ),
-                );
-                setState(() {});
-              },
-              child: Text(
-                "Example Screen",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: _openAppAfterUnlocks ? Colors.blue : Colors.grey,
+                  trailing: Switch(
+                    value: _openAppAfterUnlocks,
+                    onChanged: (value) async {
+                      if (value) {
+                        bool? startedForegroundService =
+                            await _androidCountUnlocksManager
+                                .startForegroundService();
+                        startedForegroundService ??= false;
+                        _openAppAfterUnlocks = startedForegroundService;
+                      } else {
+                        await _androidCountUnlocksManager
+                            .endForegroundService();
+                        _openAppAfterUnlocks = false;
+                      }
+                      if (!_openAppAfterUnlocks) {
+                        _expansionTileController.collapse();
+                      }
+                      setState(() {});
+                    },
+                  ),
                 ),
-              ),
-            ),
-          ),
-        ],
-      ),
+                IgnorePointer(
+                  ignoring: !_openAppAfterUnlocks,
+                  child: ExpansionTile(
+                    controller: _expansionTileController,
+                    title: Text(
+                      "Selected Topics to learn:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color:
+                            _openAppAfterUnlocks ? Colors.white : Colors.grey,
+                      ),
+                    ),
+                    children: List.generate(
+                      SubjectManager.subjects.length,
+                      (index) => _listSubjectExpansionTileBuilder(index),
+                    ),
+                  ),
+                ),
+                IgnorePointer(
+                  ignoring: !_openAppAfterUnlocks,
+                  child: TextButton(
+                    onPressed: () async {
+                      List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
+
+                      List<Pair<Subject, int>> learningTopics =
+                          SubjectManager.getLearningTopics();
+
+                      for (int i = 0; i < learningTopics.length; i++) {
+                        Topic topic = learningTopics[i]
+                            .first
+                            .topics[learningTopics[i].second];
+
+                        await SubjectManager.loadStudyCards(
+                            learningTopics[i].first, topic);
+
+                        for (StudyCard studyCard in topic.studyCards) {
+                          Pair3<Subject, Topic, StudyCard> pair = Pair3(
+                            learningTopics[i].first,
+                            topic,
+                            studyCard,
+                          );
+                          studyCardList.add(pair);
+                        }
+                      }
+
+                      studyCardList.sort(
+                        (a, b) => a.third.learningScore
+                            .compareTo(b.third.learningScore),
+                      );
+                      if (studyCardList.isEmpty) {
+                        //display msg
+                        return;
+                      }
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => StudyCardLearningPage(
+                            studyCardList: studyCardList,
+                          ),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                    child: Text(
+                      "Example Screen",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: _openAppAfterUnlocks ? Colors.blue : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
     );
   }
 
