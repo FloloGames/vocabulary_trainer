@@ -39,6 +39,7 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
           ? TextField(
               autofocus: true,
               style: widget.textStyle,
+              textAlign: TextAlign.center,
               controller: textEditingController,
               onSubmitted: (newText) {
                 setState(() {
@@ -51,6 +52,7 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
             )
           : Text(
               widget.preText + textEditingController.text,
+              textAlign: TextAlign.center,
               style: widget.textStyle,
             ),
     );

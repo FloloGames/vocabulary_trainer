@@ -175,6 +175,7 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
                       (widget.studyCardList[currCardIndex].third
                               .questionLearnObjects[0] as TextObject)
                           .text,
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 22,
@@ -203,6 +204,7 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
                       (widget.studyCardList[currCardIndex].third
                               .answerLearnObjects[0] as TextObject)
                           .text,
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 22,

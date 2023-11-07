@@ -1,3 +1,4 @@
 * Add StudySmarter like Painter at the top
 * color studyCards with last answer 
 * settings_page add possibility to change unlockCount and StudyCardCount
+* add auto update functionality

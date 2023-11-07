@@ -22,7 +22,7 @@ class _SettingsPageState extends State<SettingsPage> {
       AndroidCountUnlocksManager.instance;
 
   bool _openAppAfterUnlocks = false;
-
+  int _currUnlockCount = -1;
   // ignore: prefer_final_fields
 
   @override
@@ -40,6 +40,9 @@ class _SettingsPageState extends State<SettingsPage> {
         await _androidCountUnlocksManager.isForegroundServiceRunning();
     isForegroundServiceRunning ??= false;
     _openAppAfterUnlocks = isForegroundServiceRunning;
+    int? count = await AndroidCountUnlocksManager.instance.getUnlockCount();
+    count ??= -1;
+    _currUnlockCount = count;
     setState(() {});
   }
 
@@ -87,9 +90,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 ListTile(
                   onTap: () {},
-                  title: Text(
-                    "Request ${_androidCountUnlocksManager.unlockCountToOpenApp} Study Cards",
-                    style: const TextStyle(
+                  title: const Text(
+                    "Request 4 Study Cards",
+                    style: TextStyle(
                       fontSize: 18,
                     ),
                   ),
@@ -162,6 +165,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         fontSize: 18,
                         color: _openAppAfterUnlocks ? Colors.blue : Colors.grey,
                       ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    "Current Unlock Count:\n$_currUnlockCount",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.grey,
                     ),
                   ),
                 ),
