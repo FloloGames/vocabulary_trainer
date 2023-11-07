@@ -59,8 +59,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         if(call.method.contentEquals(testMethodName)){
             Toast.makeText(this, "TestMethod works!", Toast.LENGTH_LONG).show();
         } else if(call.method.contentEquals(getUnlockCountMethodName)){
-            Toast.makeText(this, "TestMethod works!", Toast.LENGTH_LONG).show();
-
             AndroidForegroundService androidForegroundService = AndroidForegroundService.getInstance();
 
             if(androidForegroundService == null){
