@@ -18,7 +18,10 @@ import 'package:vocabulary_trainer/code_behind/topic.dart';
 class StudyCardLearningPage extends StatefulWidget {
   List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
 
-  StudyCardLearningPage({super.key, required this.studyCardList});
+  bool repeat = true;
+
+  StudyCardLearningPage(
+      {super.key, required this.studyCardList, this.repeat = true});
 
   @override
   State<StudyCardLearningPage> createState() => _StudyCardLearningPageState();
@@ -168,7 +171,10 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
                   ),
                   child: Center(
                     child: Text(
-                      "index: ${widget.studyCardList[currCardIndex].third.index}\nscore: ${widget.studyCardList[currCardIndex].third.learningScore}\n${(widget.studyCardList[currCardIndex].third.questionLearnObjects[0] as TextObject).text}",
+                      // "index: ${widget.studyCardList[currCardIndex].third.index}\nscore: ${widget.studyCardList[currCardIndex].third.learningScore}\n${(widget.studyCardList[currCardIndex].third.questionLearnObjects[0] as TextObject).text}",
+                      (widget.studyCardList[currCardIndex].third
+                              .questionLearnObjects[0] as TextObject)
+                          .text,
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 22,
@@ -316,7 +322,13 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
 
     currCardIndex++;
 
-    if (currCardIndex >= widget.studyCardList.length) currCardIndex = 0;
+    if (currCardIndex >= widget.studyCardList.length) {
+      currCardIndex = 0;
+      if (!widget.repeat) {
+        Navigator.of(context).pop();
+        return;
+      }
+    }
 
     _studyCardProvider.resetPositionAndAngle();
     FlipCardState? cardState = _flipCardController.state;

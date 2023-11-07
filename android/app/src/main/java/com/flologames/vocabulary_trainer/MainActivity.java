@@ -27,6 +27,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     private static final String isForegroundServiceRunning = "isForegroundServiceRunning";
     private static final String setUnlockCountToOpenApp = "setUnlockCountToOpenApp";
     private static final String getUnlockCountToOpenApp = "getUnlockCountToOpenApp";
+    private static final String vocabularyDone = "vocabularyDone";
     private static MethodChannel testMethodChannel;
 
     Intent foregroundServiceIntent;
@@ -108,6 +109,14 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
                 int count = foregroundService.getUnlockCountToOpenApp();
                 Log.i("getUnlockCountToOpenApp", String.valueOf(count));
                 result.success(count);
+            }
+        } else if(call.method.contentEquals(vocabularyDone)){
+            AndroidForegroundService foregroundService = AndroidForegroundService.getInstance();
+            if(foregroundService == null) {
+                result.success(false);
+            } else {
+                foregroundService.vocabularyDone();
+                result.success(true);
             }
         } else {
             result.notImplemented();

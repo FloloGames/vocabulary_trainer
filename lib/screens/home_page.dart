@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:vocabulary_trainer/code_behind/android_count_unlocks_manager.dart';
+import 'package:vocabulary_trainer/code_behind/pair.dart';
+import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
+import 'package:vocabulary_trainer/code_behind/topic.dart';
 import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
 import 'package:vocabulary_trainer/screens/hero_dialog_route.dart';
 import 'package:vocabulary_trainer/screens/settings_page.dart';
+import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 import 'package:vocabulary_trainer/screens/subject_page.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 // import 'package:reorderables/reorderables.dart';
@@ -17,13 +23,95 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   static const columnCount = 2;
+
+  Future<void> _appStarted() async {
+    int vocabularyCount = 4;
+
+    print("App Started");
+    // ignore: unused_local_variable
+    final AndroidCountUnlocksManager androidCountUnlocksManager =
+        AndroidCountUnlocksManager.instance;
+
+    int? count = await androidCountUnlocksManager.getUnlockCount();
+
+    count ??= -1;
+
+    if (count < androidCountUnlocksManager.unlockCountToOpenApp) {
+      return;
+    }
+
+    List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
+
+    await SubjectManager.loadSubjects(loadTopics_: true);
+
+    List<Pair<Subject, int>> learningTopics =
+        SubjectManager.getLearningTopics();
+
+    for (int i = 0; i < learningTopics.length; i++) {
+      Topic topic = learningTopics[i].first.topics[learningTopics[i].second];
+
+      await SubjectManager.loadStudyCards(learningTopics[i].first, topic);
+
+      for (StudyCard studyCard in topic.studyCards) {
+        Pair3<Subject, Topic, StudyCard> pair = Pair3(
+          learningTopics[i].first,
+          topic,
+          studyCard,
+        );
+        studyCardList.add(pair);
+      }
+    }
+
+    studyCardList.sort(
+      (a, b) => a.third.learningScore.compareTo(b.third.learningScore),
+    );
+
+    if (vocabularyCount < studyCardList.length) {
+      for (int i = vocabularyCount; i < studyCardList.length; i++) {
+        studyCardList.removeAt(vocabularyCount);
+      }
+    }
+
+    if (studyCardList.isEmpty) {
+      //display msg
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => StudyCardLearningPage(
+          studyCardList: studyCardList,
+          repeat: false,
+        ),
+      ),
+    );
+
+    androidCountUnlocksManager.vocabularyDone();
+
+    SystemNavigator.pop();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // This code will run when the app is brought to the foreground.
+      _appStarted();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _appStarted();
     SubjectManager.loadSubjects(loadTopics_: false);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override

@@ -1,11 +1,18 @@
 // import 'package:flip_card/flip_card.dart';
 // import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:vocabulary_trainer/code_behind/android_count_unlocks_manager.dart';
+import 'package:vocabulary_trainer/code_behind/pair.dart';
+import 'package:vocabulary_trainer/code_behind/study_card.dart';
+import 'package:vocabulary_trainer/code_behind/subject.dart';
+import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
+import 'package:vocabulary_trainer/code_behind/topic.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
 // import 'package:vocabulary_trainer/code_behind/study_card.dart';
 // import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/screens/home_page.dart';
+import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 // import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 
 // AspectRatio() für Container.. aber vorher noch documentation checken weil vielleicht doch nicht das richtige lol
@@ -14,9 +21,14 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -199,7 +199,7 @@ class SubjectManager {
     saveTopic(subject, topic);
   }
 
-  static void loadSubjects({bool loadTopics_ = false}) async {
+  static Future<void> loadSubjects({bool loadTopics_ = false}) async {
     final Directory saveDir = await getSubjectsSaveDir();
 
     List<FileSystemEntity> subjectFiles = saveDir.listSync(

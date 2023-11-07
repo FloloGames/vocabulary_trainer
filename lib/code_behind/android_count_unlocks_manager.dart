@@ -15,15 +15,24 @@ class AndroidCountUnlocksManager {
       "isForegroundServiceRunning";
   static const String _setUnlockCountToOpenApp = "setUnlockCountToOpenApp";
   static const String _getUnlockCountToOpenApp = "getUnlockCountToOpenApp";
+  static const String _vocabularyDone = "vocabularyDone";
 
-  AndroidCountUnlocksManager() {
-    // testCBMethodChannel.setMethodCallHandler((call) {
-    //   if (call.method == testCBMethodName) {
-    //     debugText = call.arguments.toString();
-    //     setState(() {});
-    //   }
-    //   return Future.value();
-    // });
+  static AndroidCountUnlocksManager instance = AndroidCountUnlocksManager();
+
+  // AndroidCountUnlocksManager() {
+  //   // testCBMethodChannel.setMethodCallHandler((call) {
+  //   //   if (call.method == testCBMethodName) {
+  //   //     debugText = call.arguments.toString();
+  //   //     setState(() {});
+  //   //   }
+  //   //   return Future.value();
+  //   // });
+  // }
+
+  final int unlockCountToOpenApp = 5;
+
+  Future<void> vocabularyDone() {
+    return _testMethodChannel.invokeMethod(_vocabularyDone);
   }
 
   Future<bool?> setUnlockCountToOpenApp(int count) {

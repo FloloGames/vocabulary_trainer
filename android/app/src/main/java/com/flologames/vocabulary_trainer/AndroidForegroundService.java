@@ -12,6 +12,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 public class AndroidForegroundService extends Service {
+    Intent dialogIntent;
     int unlockCountToOpenApp = 5;
     int unlocksCount = 0;
     int totalUnlocksCount = 0;
@@ -26,12 +27,15 @@ public class AndroidForegroundService extends Service {
         if(unlocksCount < unlockCountToOpenApp){
             return;
         }
-        Intent dialogIntent = new Intent(this, MainActivity.class);
+        dialogIntent = new Intent(this, MainActivity.class);
+
+        stopService(dialogIntent);
+
         dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         dialogIntent.putExtra("totalUnlockCount", totalUnlocksCount); // Replace "key" and "value" with your actual data
 
         startActivity(dialogIntent);
-        unlocksCount = 0;
+        //unlocksCount = 0;
     }
     public int getUnlockCountToOpenApp(){
         Log.i("getUnlockCountToOpenApp", String.valueOf(unlockCountToOpenApp));
@@ -74,7 +78,9 @@ public class AndroidForegroundService extends Service {
 
         return super.onStartCommand(intent, flags, startId);
     }
-
+    public void vocabularyDone(){
+        unlocksCount = 0;
+    }
     @Override
     public void onDestroy() {
         if(deviceUnlockManager != null){

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vocabulary_trainer/code_behind/android_count_unlocks_manager.dart';
 import 'package:vocabulary_trainer/code_behind/pair.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
@@ -16,12 +17,30 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final ExpansionTileController _expansionTileController =
       ExpansionTileController();
+
+  final AndroidCountUnlocksManager _androidCountUnlocksManager =
+      AndroidCountUnlocksManager.instance;
+
   bool _openAppAfterUnlocks = false;
+
+  // ignore: prefer_final_fields
 
   @override
   void initState() {
     super.initState();
     SubjectManager.loadSubjects(loadTopics_: true);
+    _asyncInit();
+  }
+
+  Future<void> _asyncInit() async {
+    //TODO save and load shit
+    _androidCountUnlocksManager.setUnlockCountToOpenApp(
+        _androidCountUnlocksManager.unlockCountToOpenApp);
+    bool? isForegroundServiceRunning =
+        await _androidCountUnlocksManager.isForegroundServiceRunning();
+    isForegroundServiceRunning ??= false;
+    _openAppAfterUnlocks = isForegroundServiceRunning;
+    setState(() {});
   }
 
   @override
@@ -36,17 +55,26 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: () {
               //set unlock count
             },
-            title: const Text(
-              "Open app after {n} unlocks",
-              style: TextStyle(
+            title: Text(
+              "Open app after ${_androidCountUnlocksManager.unlockCountToOpenApp} unlocks",
+              style: const TextStyle(
                 fontSize: 18,
               ),
             ),
             trailing: Switch(
               value: _openAppAfterUnlocks,
-              onChanged: (value) {
-                _openAppAfterUnlocks = value;
-                if (!value) {
+              onChanged: (value) async {
+                if (value) {
+                  bool? startedForegroundService =
+                      await _androidCountUnlocksManager
+                          .startForegroundService();
+                  startedForegroundService ??= false;
+                  _openAppAfterUnlocks = startedForegroundService;
+                } else {
+                  await _androidCountUnlocksManager.endForegroundService();
+                  _openAppAfterUnlocks = false;
+                }
+                if (!_openAppAfterUnlocks) {
                   _expansionTileController.collapse();
                 }
                 setState(() {});
@@ -174,6 +202,8 @@ class ListTopicExpansionTile extends StatefulWidget {
 }
 
 class _ListTopicExpansionTileState extends State<ListTopicExpansionTile> {
+  AndroidCountUnlocksManager androidCountUnlocksManager =
+      AndroidCountUnlocksManager();
   bool _switchValue = false;
 
   @override
