@@ -40,6 +40,8 @@ dependencies:
   # reorderables: ^0.6.0
   flutter_colorpicker: ^1.0.3
   rxdart: ^0.27.7
+  dio: ^5.3.3
+  android_package_installer: ^0.0.2
   # provider: ^6.0.5
 
 dev_dependencies:
