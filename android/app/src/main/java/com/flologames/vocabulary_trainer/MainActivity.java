@@ -80,6 +80,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             if(isForegroundServiceRunning()){
                 stopService(foregroundServiceIntent);
             }
+            result.success(isForegroundServiceRunning());
         } else if(call.method.contentEquals(isForegroundServiceRunning)){
             result.success(isForegroundServiceRunning());
         } else if(call.method.contentEquals(setUnlockCountToOpenApp)){
