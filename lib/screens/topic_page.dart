@@ -165,7 +165,7 @@ class _TopicPageState extends State<TopicPage> {
       ),
     );
 
-    if (studyCard.awnserLearnObjects.isEmpty ||
+    if (studyCard.answerLearnObjects.isEmpty ||
         studyCard.questionLearnObjects.isEmpty) {
       return;
     }

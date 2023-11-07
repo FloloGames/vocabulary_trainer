@@ -14,15 +14,16 @@ class StudyCard {
   // ignore: constant_identifier_names
   static const QUESTION_LEARN_OBJECTS_KEY = "question_learn_objects_key";
   // ignore: constant_identifier_names
-  static const AWNSER_LEARN_OBJECTS_KEY = "awnser_learn_objects_key";
+  //TODO: typo in answer.. but if I change the current learnobjects wont get loaded..
+  static const ANSWER_LEARN_OBJECTS_KEY = "awnser_learn_objects_key";
   // ignore: constant_identifier_names
   static const SCORE_KEY = "score_key";
 
   List<LearningObject> questionLearnObjects = [
     TextObject("Question", Offset.zero, Paint()),
   ];
-  List<LearningObject> awnserLearnObjects = [
-    TextObject("Awnser", Offset.zero, Paint()),
+  List<LearningObject> answerLearnObjects = [
+    TextObject("Answer", Offset.zero, Paint()),
   ];
 
   //da muss ich mir noch was schlaues überlegen
@@ -33,7 +34,7 @@ class StudyCard {
 
   void setParamsFromJson(Map<String, dynamic> json) {
     _setQuestionLearnObjectsFromJson(json[QUESTION_LEARN_OBJECTS_KEY]);
-    _setAwnserLearnObjectsFromJson(json[AWNSER_LEARN_OBJECTS_KEY]);
+    _setAnswerLearnObjectsFromJson(json[ANSWER_LEARN_OBJECTS_KEY]);
     learningScore = int.parse(json[SCORE_KEY]);
   }
 
@@ -48,19 +49,19 @@ class StudyCard {
       });
     }
 
-    Map<String, dynamic> awnserObjects = {};
-    for (int i = 0; i < awnserLearnObjects.length; i++) {
-      LearningObject obj = awnserLearnObjects[i];
+    Map<String, dynamic> answerObjects = {};
+    for (int i = 0; i < answerLearnObjects.length; i++) {
+      LearningObject obj = answerLearnObjects[i];
       Map<String, dynamic> objJson = obj.toJson();
 
-      awnserObjects.addAll({
+      answerObjects.addAll({
         "index:$i": objJson, //TODO: man kann index: vielleicht weglassen
       });
     }
 
     return {
       QUESTION_LEARN_OBJECTS_KEY: questionLearnObjects,
-      AWNSER_LEARN_OBJECTS_KEY: awnserLearnObjects,
+      ANSWER_LEARN_OBJECTS_KEY: answerLearnObjects,
       SCORE_KEY: learningScore.toString(),
     };
   }
@@ -81,15 +82,15 @@ class StudyCard {
     }
   }
 
-  void _setAwnserLearnObjectsFromJson(List<dynamic> listOfJson) {
-    awnserLearnObjects.clear();
+  void _setAnswerLearnObjectsFromJson(List<dynamic> listOfJson) {
+    answerLearnObjects.clear();
     for (int i = 0; i < listOfJson.length; i++) {
       Map<String, dynamic> objJson = listOfJson[i];
       switch (objJson[LearningObject.TYPE_KEY]) {
         case TextObject.TYPE_KEY:
           TextObject textObject = TextObject("text", Offset.zero, Paint());
           textObject.setParamsFromJson(objJson);
-          awnserLearnObjects.add(textObject);
+          answerLearnObjects.add(textObject);
           break;
       }
     }

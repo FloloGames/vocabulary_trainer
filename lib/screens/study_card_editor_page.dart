@@ -184,13 +184,13 @@ class _StudyCardEditorPageState extends State<StudyCardEditorPage> {
               child: EditableTextWidget(
                 preText: "",
                 initialText:
-                    (widget.studyCard.awnserLearnObjects[0] as TextObject).text,
+                    (widget.studyCard.answerLearnObjects[0] as TextObject).text,
                 textStyle: const TextStyle(
                   color: Colors.black,
                   fontSize: 22,
                 ),
                 onTextSaved: (text) {
-                  (widget.studyCard.awnserLearnObjects[0] as TextObject).text =
+                  (widget.studyCard.answerLearnObjects[0] as TextObject).text =
                       text;
                   setState(() {});
                 },

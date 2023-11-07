@@ -201,7 +201,7 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
                   child: Center(
                     child: Text(
                       (widget.studyCardList[currCardIndex].third
-                              .awnserLearnObjects[0] as TextObject)
+                              .answerLearnObjects[0] as TextObject)
                           .text,
                       style: const TextStyle(
                         color: Colors.black,

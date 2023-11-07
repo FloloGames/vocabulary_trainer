@@ -85,6 +85,15 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                 ),
+                ListTile(
+                  onTap: () {},
+                  title: Text(
+                    "Request ${_androidCountUnlocksManager.unlockCountToOpenApp} Study Cards",
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
                 IgnorePointer(
                   ignoring: !_openAppAfterUnlocks,
                   child: ExpansionTile(
