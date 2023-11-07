@@ -42,6 +42,10 @@ class _SubjectPageState extends State<SubjectPage> {
             onPressed: _addNewTopic,
             icon: const Icon(Icons.add),
           ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.keyboard_double_arrow_down_sharp),
+          ),
         ],
       ),
       body: StreamBuilder<Pair<Subject, Topic>>(
@@ -163,6 +167,45 @@ class _SubjectPageState extends State<SubjectPage> {
       SubjectManager.renameTopicAt(widget.subject, index, newTopicName);
     }
     setState(() {});
+  }
+
+  Future<String?> _showImportTopicDialog() async {
+    String? subjectName;
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String newItem = '';
+        return AlertDialog(
+          title: const Text('Import Quizlet Lektion'),
+          content: Column(
+            children: [
+              TextField(
+                autofocus: true,
+                onChanged: (value) {
+                  newItem = value;
+                },
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Add'),
+              onPressed: () {
+                subjectName = newItem;
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return subjectName;
   }
 
   Future<String?> _showAddItemDialog() async {
