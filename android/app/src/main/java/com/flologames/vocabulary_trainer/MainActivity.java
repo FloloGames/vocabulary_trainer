@@ -4,11 +4,14 @@ package com.flologames.vocabulary_trainer;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.widget.Toast;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 
+import java.io.File;
 import java.util.Map;
 
 import io.flutter.Log;
@@ -28,6 +31,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     private static final String setUnlockCountToOpenApp = "setUnlockCountToOpenApp";
     private static final String getUnlockCountToOpenApp = "getUnlockCountToOpenApp";
     private static final String vocabularyDone = "vocabularyDone";
+    private static final String installApk = "installApk";
     private static MethodChannel testMethodChannel;
 
     Intent foregroundServiceIntent;
@@ -116,6 +120,31 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             } else {
                 foregroundService.vocabularyDone();
                 result.success(true);
+            }
+        } else if(call.method.contentEquals(installApk)){
+            Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+
+            String filePath = "";
+            try {
+                filePath = arguments.get("path").toString();
+
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+            File file = new File(filePath);
+
+            if (file.exists()) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Uri apkUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", file);
+                intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(intent);
+
+                result.success(true);
+            } else {
+                // Handle the case where the APK file doesn't exist
+                result.success(false);
             }
         } else {
             result.notImplemented();

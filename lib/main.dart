@@ -7,6 +7,7 @@ import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
+import 'package:vocabulary_trainer/code_behind/update_manager.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
 // import 'package:vocabulary_trainer/code_behind/study_card.dart';
@@ -19,7 +20,14 @@ import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 
 void main() {
   runApp(const MyApp());
+  // _searchForNewUpdate();
 }
+
+// Future<void> _searchForNewUpdate() async {
+//   if (await UpdateManager.instance.isUpdateAvaiable()) {
+//     print("Update Avaiable");
+//   }
+// }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});

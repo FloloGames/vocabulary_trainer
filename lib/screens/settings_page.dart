@@ -5,6 +5,7 @@ import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
+import 'package:vocabulary_trainer/code_behind/update_manager.dart';
 import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -24,6 +25,8 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _openAppAfterUnlocks = false;
   int _currUnlockCount = -1;
   // ignore: prefer_final_fields
+
+  bool _alreadyUpdating = false;
 
   @override
   void initState() {
@@ -51,135 +54,177 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
+        actions: [
+          IgnorePointer(
+            ignoring: _alreadyUpdating,
+            child: IconButton(
+              onPressed: () async {
+                if (_alreadyUpdating) return;
+                _alreadyUpdating = true;
+                setState(() {});
+                bool isUpdateAvaiable =
+                    await UpdateManager.instance.isUpdateAvaiable();
+                if (isUpdateAvaiable) {
+                  bool downloadNewVersion = await _newUpdateAvailable();
+                  if (downloadNewVersion) {
+                    bool successful =
+                        await UpdateManager.instance.downloadNewestApk();
+                    if (successful) {
+                      //install
+                      UpdateManager.instance.installNewestApk();
+                    }
+                  }
+                } else {
+                  _noNewUpdateAvailable();
+                }
+                _alreadyUpdating = false;
+                setState(() {});
+              },
+              icon: const Icon(Icons.system_update_alt_rounded),
+            ),
+          ),
+        ],
       ),
       body: StreamBuilder(
-          stream: SubjectManager.topicStream,
-          builder: (context, snapshot) {
-            return ListView(
-              children: [
-                ListTile(
-                  onTap: () {
-                    //set unlock count
-                  },
-                  title: Text(
-                    "Open app after ${_androidCountUnlocksManager.unlockCountToOpenApp} unlocks",
-                    style: const TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                  trailing: Switch(
-                    value: _openAppAfterUnlocks,
-                    onChanged: (value) async {
-                      if (value) {
-                        bool? startedForegroundService =
-                            await _androidCountUnlocksManager
-                                .startForegroundService();
-                        startedForegroundService ??= false;
-                        _openAppAfterUnlocks = startedForegroundService;
-                      } else {
-                        await _androidCountUnlocksManager
-                            .endForegroundService();
-                        _openAppAfterUnlocks = false;
-                      }
-                      if (!_openAppAfterUnlocks) {
-                        _expansionTileController.collapse();
-                      }
-                      setState(() {});
-                    },
+        stream: SubjectManager.topicStream,
+        builder: (context, snapshot) {
+          return ListView(
+            children: [
+              ListTile(
+                onTap: () {
+                  //set unlock count
+                },
+                title: Text(
+                  "Open app after ${_androidCountUnlocksManager.unlockCountToOpenApp} unlocks",
+                  style: const TextStyle(
+                    fontSize: 18,
                   ),
                 ),
-                ListTile(
-                  onTap: () {},
-                  title: const Text(
-                    "Request 4 Study Cards",
+                trailing: Switch(
+                  value: _openAppAfterUnlocks,
+                  onChanged: (value) async {
+                    if (value) {
+                      bool? startedForegroundService =
+                          await _androidCountUnlocksManager
+                              .startForegroundService();
+                      startedForegroundService ??= false;
+                      _openAppAfterUnlocks = startedForegroundService;
+                    } else {
+                      await _androidCountUnlocksManager.endForegroundService();
+                      _openAppAfterUnlocks = false;
+                    }
+                    if (!_openAppAfterUnlocks) {
+                      _expansionTileController.collapse();
+                    }
+                    setState(() {});
+                  },
+                ),
+              ),
+              ListTile(
+                onTap: () {},
+                title: const Text(
+                  "Request 4 Study Cards",
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              IgnorePointer(
+                ignoring: !_openAppAfterUnlocks,
+                child: ExpansionTile(
+                  controller: _expansionTileController,
+                  title: Text(
+                    "Selected Topics to learn:",
                     style: TextStyle(
                       fontSize: 18,
+                      color: _openAppAfterUnlocks ? Colors.white : Colors.grey,
                     ),
                   ),
-                ),
-                IgnorePointer(
-                  ignoring: !_openAppAfterUnlocks,
-                  child: ExpansionTile(
-                    controller: _expansionTileController,
-                    title: Text(
-                      "Selected Topics to learn:",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color:
-                            _openAppAfterUnlocks ? Colors.white : Colors.grey,
-                      ),
-                    ),
-                    children: List.generate(
-                      SubjectManager.subjects.length,
-                      (index) => _listSubjectExpansionTileBuilder(index),
-                    ),
+                  children: List.generate(
+                    SubjectManager.subjects.length,
+                    (index) => _listSubjectExpansionTileBuilder(index),
                   ),
                 ),
-                IgnorePointer(
-                  ignoring: !_openAppAfterUnlocks,
-                  child: TextButton(
-                    onPressed: () async {
-                      List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
+              ),
+              // IgnorePointer(
+              //   ignoring: !_openAppAfterUnlocks,
+              //   child: TextButton(
+              //     onPressed: () async {
+              //       List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
 
-                      List<Pair<Subject, int>> learningTopics =
-                          SubjectManager.getLearningTopics();
+              //       List<Pair<Subject, int>> learningTopics =
+              //           SubjectManager.getLearningTopics();
 
-                      for (int i = 0; i < learningTopics.length; i++) {
-                        Topic topic = learningTopics[i]
-                            .first
-                            .topics[learningTopics[i].second];
+              //       for (int i = 0; i < learningTopics.length; i++) {
+              //         Topic topic = learningTopics[i]
+              //             .first
+              //             .topics[learningTopics[i].second];
 
-                        await SubjectManager.loadStudyCards(
-                            learningTopics[i].first, topic);
+              //         await SubjectManager.loadStudyCards(
+              //             learningTopics[i].first, topic);
 
-                        for (StudyCard studyCard in topic.studyCards) {
-                          Pair3<Subject, Topic, StudyCard> pair = Pair3(
-                            learningTopics[i].first,
-                            topic,
-                            studyCard,
-                          );
-                          studyCardList.add(pair);
-                        }
-                      }
+              //         for (StudyCard studyCard in topic.studyCards) {
+              //           Pair3<Subject, Topic, StudyCard> pair = Pair3(
+              //             learningTopics[i].first,
+              //             topic,
+              //             studyCard,
+              //           );
+              //           studyCardList.add(pair);
+              //         }
+              //       }
 
-                      studyCardList.sort(
-                        (a, b) => a.third.learningScore
-                            .compareTo(b.third.learningScore),
-                      );
-                      if (studyCardList.isEmpty) {
-                        //display msg
-                        return;
-                      }
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => StudyCardLearningPage(
-                            studyCardList: studyCardList,
-                          ),
-                        ),
-                      );
-                      setState(() {});
-                    },
-                    child: Text(
-                      "Example Screen",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: _openAppAfterUnlocks ? Colors.blue : Colors.grey,
-                      ),
-                    ),
+              //       studyCardList.sort(
+              //         (a, b) => a.third.learningScore
+              //             .compareTo(b.third.learningScore),
+              //       );
+              //       if (studyCardList.isEmpty) {
+              //         //display msg
+              //         return;
+              //       }
+              //       await Navigator.of(context).push(
+              //         MaterialPageRoute(
+              //           builder: (context) => StudyCardLearningPage(
+              //             studyCardList: studyCardList,
+              //           ),
+              //         ),
+              //       );
+              //       setState(() {});
+              //     },
+              //     child: Text(
+              //       "Example Screen",
+              //       style: TextStyle(
+              //         fontSize: 18,
+              //         color: _openAppAfterUnlocks ? Colors.blue : Colors.grey,
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              Center(
+                child: Text(
+                  "Current Unlock Count:\n$_currUnlockCount",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.grey,
                   ),
                 ),
-                Center(
-                  child: Text(
-                    "Current Unlock Count:\n$_currUnlockCount",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }),
+              ),
+              const SizedBox(
+                height: 100,
+              ),
+              Visibility(
+                visible: _alreadyUpdating,
+                child: StreamBuilder<double>(
+                    stream: UpdateManager.instance.downloadPercentStream,
+                    builder: (context, snapshot) {
+                      double percent = snapshot.data ?? 0;
+                      return Center(
+                          child: Text("Download ${percent.toInt()}%"));
+                    }),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -216,6 +261,57 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
+  Future<bool> _newUpdateAvailable() async {
+    bool downloadNewVersion = false;
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("New Version is available"),
+          content: const Text("Do you want to download it now?"),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                downloadNewVersion = true;
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return downloadNewVersion;
+  }
+
+  Future _noNewUpdateAvailable() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("You are running the newest version!"),
+          // content: const Center(
+          //   child: Text("Do you want to download it now?"),
+          // ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class ListTopicExpansionTile extends StatefulWidget {
@@ -232,12 +328,12 @@ class ListTopicExpansionTile extends StatefulWidget {
 class _ListTopicExpansionTileState extends State<ListTopicExpansionTile> {
   AndroidCountUnlocksManager androidCountUnlocksManager =
       AndroidCountUnlocksManager();
-  bool _switchValue = false;
+  bool switchValue = false;
 
   @override
   void initState() {
     super.initState();
-    _switchValue = widget.subject.topics[widget.index].isLearningTopic;
+    switchValue = widget.subject.topics[widget.index].isLearningTopic;
   }
 
   @override
@@ -261,9 +357,9 @@ class _ListTopicExpansionTileState extends State<ListTopicExpansionTile> {
         title: Text(topic.name),
         // tileColor: const Color.fromARGB(255, 127, 127, 127),
         trailing: Switch(
-          value: _switchValue,
+          value: switchValue,
           onChanged: (value) {
-            _switchValue = value;
+            switchValue = value;
             setState(() {});
             topic.isLearningTopic = value;
             SubjectManager.saveTopicAt(

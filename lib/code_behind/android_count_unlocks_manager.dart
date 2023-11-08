@@ -16,6 +16,7 @@ class AndroidCountUnlocksManager {
   static const String _setUnlockCountToOpenApp = "setUnlockCountToOpenApp";
   static const String _getUnlockCountToOpenApp = "getUnlockCountToOpenApp";
   static const String _vocabularyDone = "vocabularyDone";
+  static const String _installApk = "installApk";
 
   static AndroidCountUnlocksManager instance = AndroidCountUnlocksManager();
 
@@ -30,6 +31,11 @@ class AndroidCountUnlocksManager {
   // }
 
   final int unlockCountToOpenApp = 5;
+
+  Future<bool?> installApk(String path) {
+    Map<String, dynamic> map = {"path": path};
+    return _testMethodChannel.invokeMethod(_installApk, map);
+  }
 
   Future<void> vocabularyDone() {
     return _testMethodChannel.invokeMethod(_vocabularyDone);
