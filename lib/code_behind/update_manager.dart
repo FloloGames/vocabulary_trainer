@@ -14,7 +14,7 @@ class UpdateManager {
   static const URL_TO_NEWEST_APK =
       "https://raw.githubusercontent.com/FloloGames/vocabulary_trainer/main/newest_build/app-release.apk";
   // ignore: constant_identifier_names
-  static const CURRENT_VERSION = 1.0;
+  static const CURRENT_VERSION = 1.1;
 
   static UpdateManager instance = UpdateManager();
 
@@ -100,12 +100,12 @@ class UpdateManager {
     if (!await _requestPermission(Permission.requestInstallPackages)) {
       return false;
     }
-    if (!await _requestPermission(Permission.manageExternalStorage)) {
-      //return false;
-    }
-    if (!await _requestPermission(Permission.storage)) {
-      //return false;
-    }
+    // if (!await _requestPermission(Permission.manageExternalStorage)) {
+    //   //return false;
+    // }
+    // if (!await _requestPermission(Permission.storage)) {
+    //   //return false;
+    // }
 
     // int? statusCode =
     //     await AndroidPackageInstaller.installApk(apkFilePath: _savePath);

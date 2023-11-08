@@ -139,6 +139,7 @@ class _TopicPageState extends State<TopicPage> {
                 child: Text(
                   // "i: ${studyCard.index} | ls: ${studyCard.learningScore}\n${(studyCard.questionLearnObjects[0] as TextObject).text}",
                   (studyCard.questionLearnObjects[0] as TextObject).text,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,

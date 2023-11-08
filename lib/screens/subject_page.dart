@@ -287,6 +287,7 @@ class _SubjectPageState extends State<SubjectPage> {
                 child: Center(
                   child: Text(
                     topic.name,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
