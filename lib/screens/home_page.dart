@@ -117,24 +117,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Subjects'),
-        actions: [
-          IconButton(
-            onPressed: _addNewSubject,
-            icon: const Icon(Icons.add),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                CustomPageTransitionAnimation(
-                  const SettingsPage(),
-                  const Alignment(.9, -0.9),
-                ),
-              );
-            },
-            icon: const Icon(Icons.settings),
-          ),
-        ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       // body: SingleChildScrollView(
       //   child: ReorderableWrap(
       //       spacing: 8.0,
@@ -161,6 +145,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       //         (index) => contextBuilder(context, index),
       //       )),
       // ),
+      bottomNavigationBar: _bottomNavigationBar(context),
+      floatingActionButton: _floatingActionButton(context),
       body: StreamBuilder(
         stream: SubjectManager.subjectStream,
         builder: (context, snapshot) {
@@ -263,6 +249,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     if (newSubjectName == null) return;
 
+    if (newSubjectName.isEmpty) return;
+    newSubjectName.trim();
+
     if (SubjectManager.subjects
         .any((element) => element.name == newSubjectName)) {
       //TODO: Show pop up..
@@ -336,6 +325,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return;
     }
 
+    if (newSubjectName.isEmpty) {
+      return;
+    }
+
+    newSubjectName.trim();
+
     if (newSubjectName == subject.name) {
       SubjectManager.saveSubjectAt(index);
     } else {
@@ -406,6 +401,41 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           child: child,
         );
       },
+    );
+  }
+
+  Widget _bottomNavigationBar(BuildContext context) {
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 6,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.home),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                CustomPageTransitionAnimation(
+                  const SettingsPage(),
+                  const Alignment(.9, -0.9),
+                ),
+              );
+            },
+            icon: const Icon(Icons.settings),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _floatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: _addNewSubject,
+      elevation: 5,
+      child: const Icon(Icons.add),
     );
   }
 

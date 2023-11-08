@@ -22,7 +22,7 @@ class SubjectPage extends StatefulWidget {
 }
 
 class _SubjectPageState extends State<SubjectPage> {
-  static const columnCount = 3;
+  static const columnCount = 1;
 
   @override
   void initState() {
@@ -42,26 +42,17 @@ class _SubjectPageState extends State<SubjectPage> {
             onPressed: _addNewTopic,
             icon: const Icon(Icons.add),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.keyboard_double_arrow_down_sharp),
-          ),
         ],
       ),
       body: StreamBuilder<Pair<Subject, Topic>>(
           stream: SubjectManager.topicStream,
           builder: (context, snapshot) {
             return SafeArea(
-              child: GridView.count(
-                childAspectRatio: 1.0,
-                padding: const EdgeInsets.all(8.0),
-                crossAxisCount: columnCount,
-                children: List.generate(
-                  widget.subject.topics.length,
-                  (int index) {
-                    return contextBuilder(context, index);
-                  },
-                ),
+              child: ListView.builder(
+                itemCount: widget.subject.topics.length,
+                itemBuilder: (context, index) {
+                  return contextBuilder(context, index);
+                },
               ),
             );
           }),
@@ -83,6 +74,9 @@ class _SubjectPageState extends State<SubjectPage> {
     String? newTopicName = await _showAddItemDialog();
 
     if (newTopicName == null) return;
+    if (newTopicName.isEmpty) return;
+
+    newTopicName.trim();
 
     if (widget.subject.topics.any((element) => element.name == newTopicName)) {
       //TODO: Show pop up..
@@ -155,6 +149,11 @@ class _SubjectPageState extends State<SubjectPage> {
       setState(() {});
       return;
     }
+
+    if (newTopicName.isEmpty) {
+      return;
+    }
+    newTopicName.trim();
 
     if (newTopicName == topic.name) {
       SubjectManager.saveTopicAt(widget.subject, index);
@@ -245,6 +244,59 @@ class _SubjectPageState extends State<SubjectPage> {
 
   Widget contextBuilder(BuildContext context, int index) {
     final topic = widget.subject.topics[index];
+    return AnimationConfiguration.staggeredList(
+      position: index,
+      duration: const Duration(milliseconds: 375),
+      child: ScaleAnimation(
+        scale: 0.1,
+        child: FadeInAnimation(
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                CustomPageTransitionAnimation(
+                  TopicPage(
+                    parentSubject: widget.subject,
+                    topic: topic,
+                  ),
+                  const Alignment(0, 0),
+                ),
+              );
+            },
+            onLongPress: () {
+              _editSubject(index);
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              padding: const EdgeInsets.all(24),
+              margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: topic.color,
+                boxShadow: [
+                  BoxShadow(
+                    color: topic.color,
+                    blurRadius: 8.0,
+                  ),
+                ],
+              ),
+              child: Text(
+                topic.name,
+                textAlign: TextAlign.left,
+                overflow: TextOverflow.visible,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget oldContextBuilder(BuildContext context, int index) {
+    final topic = widget.subject.topics[index];
     return AnimationConfiguration.staggeredGrid(
       columnCount: columnCount,
       position: index,
@@ -270,7 +322,7 @@ class _SubjectPageState extends State<SubjectPage> {
             child: Hero(
               tag: "topicContainerHero:$index",
               child: AnimatedContainer(
-                height: 100,
+                height: 50,
                 duration: const Duration(milliseconds: 375),
                 padding: const EdgeInsets.all(8.0), // Add padding
                 margin: const EdgeInsets.all(08.0),

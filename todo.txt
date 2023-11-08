@@ -11,4 +11,8 @@ push
 * Add StudySmarter like Painter at the top
 * color studyCards with last answer 
 * settings_page add possibility to change unlockCount and StudyCardCount
-* add auto update functionality
+* make topics width wide
+* add SHA256 testing for updates
+* add export button
+* add import button
+* https://www.youtube.com/watch?v=fL6nUEUAY4g

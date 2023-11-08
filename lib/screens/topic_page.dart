@@ -41,6 +41,10 @@ class _TopicPageState extends State<TopicPage> {
         title: Text("${widget.parentSubject.name} / ${widget.topic.name}"),
         actions: [
           IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.keyboard_double_arrow_down_sharp),
+          ),
+          IconButton(
             onPressed: _addNewStudyCard,
             icon: const Icon(Icons.add),
           ),
