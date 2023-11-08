@@ -6,6 +6,9 @@ import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
+import 'package:vocabulary_trainer/screens/custom_bottom_app_bar.dart';
+import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
+import 'package:vocabulary_trainer/screens/settings_page.dart';
 import 'package:vocabulary_trainer/screens/study_card_editor_page.dart';
 import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 // import 'package:reorderables/reorderables.dart';
@@ -39,14 +42,41 @@ class _TopicPageState extends State<TopicPage> {
         shadowColor: widget.topic.color,
         backgroundColor: widget.topic.color,
         title: Text("${widget.parentSubject.name} / ${widget.topic.name}"),
-        actions: [
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {},
+        //     icon: const Icon(Icons.keyboard_double_arrow_down_sharp),
+        //   ),
+        //   IconButton(
+        //     onPressed: _addNewStudyCard,
+        //     icon: const Icon(Icons.add),
+        //   ),
+        // ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewStudyCard,
+        elevation: 5,
+        child: const Icon(Icons.add),
+      ),
+      bottomNavigationBar: CustomBottomAppBar(
+        children: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.keyboard_double_arrow_down_sharp),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.arrow_back),
           ),
           IconButton(
-            onPressed: _addNewStudyCard,
-            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.of(context).push(
+                CustomPageTransitionAnimation(
+                  const SettingsPage(),
+                  const Alignment(1, 1),
+                ),
+              );
+            },
+            icon: const Icon(Icons.system_update_alt_rounded),
           ),
         ],
       ),

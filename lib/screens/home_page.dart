@@ -8,6 +8,7 @@ import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
+import 'package:vocabulary_trainer/screens/custom_bottom_app_bar.dart';
 import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
 import 'package:vocabulary_trainer/screens/hero_dialog_route.dart';
 import 'package:vocabulary_trainer/screens/settings_page.dart';
@@ -405,29 +406,24 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Widget _bottomNavigationBar(BuildContext context) {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 6,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.home),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                CustomPageTransitionAnimation(
-                  const SettingsPage(),
-                  const Alignment(.9, -0.9),
-                ),
-              );
-            },
-            icon: const Icon(Icons.settings),
-          ),
-        ],
-      ),
+    return CustomBottomAppBar(
+      children: [
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.library_books),
+        ),
+        IconButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              CustomPageTransitionAnimation(
+                const SettingsPage(),
+                const Alignment(1, 1),
+              ),
+            );
+          },
+          icon: const Icon(Icons.settings),
+        ),
+      ],
     );
   }
 

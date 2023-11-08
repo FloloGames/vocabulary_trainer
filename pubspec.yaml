@@ -42,6 +42,7 @@ dependencies:
   rxdart: ^0.27.7
   dio: ^5.3.3
   permission_handler: ^11.0.1
+  #animated_notch_bottom_bar: ^1.0.0
   # provider: ^6.0.5
 
 dev_dependencies:

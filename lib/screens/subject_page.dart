@@ -5,7 +5,9 @@ import 'package:vocabulary_trainer/code_behind/pair.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
+import 'package:vocabulary_trainer/screens/custom_bottom_app_bar.dart';
 import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
+import 'package:vocabulary_trainer/screens/settings_page.dart';
 import 'package:vocabulary_trainer/screens/topic_page.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 // import 'package:reorderables/reorderables.dart';
@@ -37,10 +39,30 @@ class _SubjectPageState extends State<SubjectPage> {
         shadowColor: widget.subject.color,
         backgroundColor: widget.subject.color,
         title: Text(widget.subject.name),
-        actions: [
+        // actions: [
+        //   IconButton(
+        //     onPressed: _addNewTopic,
+        //     icon: const Icon(Icons.add),
+        //   ),
+        // ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewTopic,
+        elevation: 5,
+        child: const Icon(Icons.add),
+      ),
+      bottomNavigationBar: CustomBottomAppBar(
+        children: [
           IconButton(
-            onPressed: _addNewTopic,
-            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
+          const SizedBox(
+            width: 24,
+            height: 24,
           ),
         ],
       ),
