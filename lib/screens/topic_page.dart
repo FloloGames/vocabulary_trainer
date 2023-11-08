@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:vocabulary_trainer/code_behind/import_study_cards_from_quizlet.dart';
 import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
 import 'package:vocabulary_trainer/code_behind/pair.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
@@ -68,15 +69,17 @@ class _TopicPageState extends State<TopicPage> {
             icon: const Icon(Icons.arrow_back),
           ),
           IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                CustomPageTransitionAnimation(
-                  const SettingsPage(),
-                  const Alignment(1, 1),
-                ),
-              );
+            onPressed: () async {
+              String studyCardsString =
+                  await _importStudyCardsFromQuizletDialog();
+              // print(studyCardsString);
+              if (studyCardsString.isEmpty) return;
+              //studyCardsUrl.trim();
+
+              ImportStudyCardsFromQuizlet.instance.addStudyCardsFromString(
+                  studyCardsString, widget.parentSubject, widget.topic);
             },
-            icon: const Icon(Icons.system_update_alt_rounded),
+            icon: const Icon(Icons.download_for_offline),
           ),
         ],
       ),
@@ -98,6 +101,49 @@ class _TopicPageState extends State<TopicPage> {
             );
           }),
     );
+  }
+
+  Future<String> _importStudyCardsFromQuizletDialog() async {
+    TextEditingController controller = TextEditingController();
+    String studyCardsString = "";
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Import StudyCards from Quizlet"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                  "1. In your set in Quizlet (website) click on “...” select “Export”.\n"),
+              const Text(
+                  "2. Press on “Copy text” and paste it in the field below."),
+              TextField(
+                maxLength: null,
+                maxLines: 5,
+                controller: controller,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Import'),
+              onPressed: () {
+                studyCardsString = controller.text;
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return studyCardsString;
   }
 
   Widget contextBuilder(BuildContext context, int index) {
@@ -153,7 +199,7 @@ class _TopicPageState extends State<TopicPage> {
               setState(() {});
             },
             onLongPress: () {
-              _editSubject(index);
+              _editStudyCard(index);
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 375),
@@ -210,7 +256,7 @@ class _TopicPageState extends State<TopicPage> {
     setState(() {});
   }
 
-  Future _editSubject(int index) async {
+  Future _editStudyCard(int index) async {
     // StudyCard studyCard = widget.topic.studyCards[index];
 
     await showDialog(

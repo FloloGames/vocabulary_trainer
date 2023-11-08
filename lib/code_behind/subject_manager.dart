@@ -516,6 +516,7 @@ class SubjectManager {
   static void addStudyCard(Subject subject, Topic topic, StudyCard studyCard) {
     topic.studyCards.add(studyCard);
     int index = topic.studyCards.length - 1;
+    studyCardStream.add(Pair(topic, studyCard));
     saveStudyCardAt(subject, topic, index);
   }
 

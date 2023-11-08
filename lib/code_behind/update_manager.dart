@@ -14,7 +14,7 @@ class UpdateManager {
   static const URL_TO_NEWEST_APK =
       "https://raw.githubusercontent.com/FloloGames/vocabulary_trainer/main/newest_build/app-release.apk";
   // ignore: constant_identifier_names
-  static const CURRENT_VERSION = 1.3;
+  static const CURRENT_VERSION = 1.4;
 
   static UpdateManager instance = UpdateManager();
 
@@ -26,10 +26,10 @@ class UpdateManager {
   // String _newest_build_hash = "";
   String _savePath = "";
 
-  String _whats_new = "";
+  String _whatsNew = "";
 
   String get savePath => _savePath;
-  String get whatsNew => _whats_new;
+  String get whatsNew => _whatsNew;
 
   Future<bool> isUpdateAvaiable() async {
     downloadPercentStream.add(0);
@@ -42,7 +42,7 @@ class UpdateManager {
     Map<String, dynamic> json = jsonDecode(response.data);
 
     double newestVersion = double.parse(json["newest_version"].toString());
-    _whats_new = json["whats_new"];
+    _whatsNew = json["whats_new"];
     // _newest_build_hash = json["hash"];
 
     // print(response);

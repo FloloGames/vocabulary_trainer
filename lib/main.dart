@@ -1,19 +1,19 @@
 // import 'package:flip_card/flip_card.dart';
 // import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:vocabulary_trainer/code_behind/android_count_unlocks_manager.dart';
-import 'package:vocabulary_trainer/code_behind/pair.dart';
-import 'package:vocabulary_trainer/code_behind/study_card.dart';
-import 'package:vocabulary_trainer/code_behind/subject.dart';
-import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
-import 'package:vocabulary_trainer/code_behind/topic.dart';
-import 'package:vocabulary_trainer/code_behind/update_manager.dart';
+// import 'package:vocabulary_trainer/code_behind/android_count_unlocks_manager.dart';
+// import 'package:vocabulary_trainer/code_behind/pair.dart';
+// import 'package:vocabulary_trainer/code_behind/study_card.dart';
+// import 'package:vocabulary_trainer/code_behind/subject.dart';
+// import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
+// import 'package:vocabulary_trainer/code_behind/topic.dart';
+// import 'package:vocabulary_trainer/code_behind/update_manager.dart';
 // import 'package:rxdart/rxdart.dart';
 // import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
 // import 'package:vocabulary_trainer/code_behind/study_card.dart';
 // import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/screens/home_page.dart';
-import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
+// import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 // import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
 
 // AspectRatio() für Container.. aber vorher noch documentation checken weil vielleicht doch nicht das richtige lol
