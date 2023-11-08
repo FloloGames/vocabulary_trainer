@@ -26,7 +26,10 @@ class UpdateManager {
   // String _newest_build_hash = "";
   String _savePath = "";
 
+  String _whats_new = "";
+
   String get savePath => _savePath;
+  String get whatsNew => _whats_new;
 
   Future<bool> isUpdateAvaiable() async {
     downloadPercentStream.add(0);
@@ -39,6 +42,7 @@ class UpdateManager {
     Map<String, dynamic> json = jsonDecode(response.data);
 
     double newestVersion = double.parse(json["newest_version"].toString());
+    _whats_new = json["whats_new"];
     // _newest_build_hash = json["hash"];
 
     // print(response);

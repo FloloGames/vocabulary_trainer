@@ -65,7 +65,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 bool isUpdateAvaiable =
                     await UpdateManager.instance.isUpdateAvaiable();
                 if (isUpdateAvaiable) {
-                  bool downloadNewVersion = await _newUpdateAvailable();
+                  bool downloadNewVersion = await _newUpdateAvailable(
+                      UpdateManager.instance.whatsNew);
                   if (downloadNewVersion) {
                     bool successful =
                         await UpdateManager.instance.downloadNewestApk();
@@ -262,17 +263,17 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<bool> _newUpdateAvailable() async {
+  Future<bool> _newUpdateAvailable(String whatsNew) async {
     bool downloadNewVersion = false;
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("New Version is available"),
-          content: const Text("Do you want to download it now?"),
+          content: Text("Features:\n$whatsNew"),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text('Yes'),
+              child: const Text('Download'),
               onPressed: () {
                 downloadNewVersion = true;
                 Navigator.of(context).pop();
