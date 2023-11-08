@@ -1,5 +1,12 @@
+!! How to push:
+set new version in UpdateManager
+set new version in newest_build/newest_version.json
+flutter build apk and move into newest_build folder
+push
+
 !! HASH on windows !!
 "Get-FileHash newest_build/app-release.apk -Algorithm SHA256"
+
 
 * Add StudySmarter like Painter at the top
 * color studyCards with last answer 
