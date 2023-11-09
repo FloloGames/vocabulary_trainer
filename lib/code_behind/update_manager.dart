@@ -14,7 +14,7 @@ class UpdateManager {
   static const URL_TO_NEWEST_APK =
       "https://raw.githubusercontent.com/FloloGames/vocabulary_trainer/main/newest_build/app-release.apk";
   // ignore: constant_identifier_names
-  static const CURRENT_VERSION = 1.4;
+  static const CURRENT_VERSION = 1.5;
 
   static UpdateManager instance = UpdateManager();
 

@@ -74,7 +74,7 @@ class _TopicPageState extends State<TopicPage> {
                   await _importStudyCardsFromQuizletDialog();
               // print(studyCardsString);
               if (studyCardsString.isEmpty) return;
-              //studyCardsUrl.trim();
+              studyCardsString.trim();
 
               ImportStudyCardsFromQuizlet.instance.addStudyCardsFromString(
                   studyCardsString, widget.parentSubject, widget.topic);

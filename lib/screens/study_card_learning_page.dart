@@ -127,6 +127,22 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
               studyCardColor = Colors.blue;
               break;
             default:
+              switch (widget.studyCardList[currCardIndex].third.lastAnswer) {
+                case StudyCardStatus.known:
+                  studyCardColor = Colors.green[300] ?? Colors.green;
+                  break;
+                case StudyCardStatus.unknown:
+                  studyCardColor = Colors.red[300] ?? Colors.red;
+                  break;
+                case StudyCardStatus.notSure:
+                  studyCardColor = Colors.yellow[300] ?? Colors.yellow;
+                  break;
+                case StudyCardStatus.ezKnown:
+                  studyCardColor = Colors.blue[300] ?? Colors.blue;
+                  break;
+                default:
+                  break;
+              }
               break;
           }
 
@@ -295,6 +311,8 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
   Future<void> _updateStudyCardLearningScore(
       int index, StudyCardStatus status) async {
     StudyCard studyCard = widget.studyCardList[index].third;
+
+    studyCard.lastAnswer = status;
 
     switch (status) {
       case StudyCardStatus.known:

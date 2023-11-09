@@ -1,5 +1,5 @@
 {
-    "newest_version": 1.4,
-    "whats_new": "-import StudyCards from Quizlet",
+    "newest_version": 1.5,
+    "whats_new": " - important you have to create all your StudyCards again!\n - new StudyCard algorithm\n - added last answer color",
     "hash": ""
 }

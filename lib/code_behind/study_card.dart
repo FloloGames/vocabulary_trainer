@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
+import 'package:vocabulary_trainer/code_behind/study_card_provider.dart';
 
 class StudyCard {
   // ignore: constant_identifier_names
@@ -18,6 +19,8 @@ class StudyCard {
   static const ANSWER_LEARN_OBJECTS_KEY = "awnser_learn_objects_key";
   // ignore: constant_identifier_names
   static const SCORE_KEY = "score_key";
+  // ignore: constant_identifier_names
+  static const LAST_ANSWER_KEY = "last_answer_key";
 
   List<LearningObject> questionLearnObjects = [
     TextObject("Question", Offset.zero, Paint()),
@@ -29,6 +32,7 @@ class StudyCard {
   //da muss ich mir noch was schlaues überlegen
   int learningScore = 0;
   int index = -1; //needed to save StudyCard
+  StudyCardStatus lastAnswer = StudyCardStatus.none;
 
   StudyCard(this.index);
 
@@ -36,6 +40,24 @@ class StudyCard {
     _setQuestionLearnObjectsFromJson(json[QUESTION_LEARN_OBJECTS_KEY]);
     _setAnswerLearnObjectsFromJson(json[ANSWER_LEARN_OBJECTS_KEY]);
     learningScore = int.parse(json[SCORE_KEY]);
+    lastAnswer = _parseLastAnswer(json[LAST_ANSWER_KEY]);
+  }
+
+  StudyCardStatus _parseLastAnswer(String value) {
+    switch (value) {
+      case "ezKnown":
+        return StudyCardStatus.ezKnown;
+      case "known":
+        return StudyCardStatus.known;
+      case "unknown":
+        return StudyCardStatus.unknown;
+      case "notSure":
+        return StudyCardStatus.notSure;
+      case "none":
+        return StudyCardStatus.none;
+      default:
+        return StudyCardStatus.none;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -63,6 +85,7 @@ class StudyCard {
       QUESTION_LEARN_OBJECTS_KEY: questionLearnObjects,
       ANSWER_LEARN_OBJECTS_KEY: answerLearnObjects,
       SCORE_KEY: learningScore.toString(),
+      LAST_ANSWER_KEY: lastAnswer.toString(),
     };
   }
 

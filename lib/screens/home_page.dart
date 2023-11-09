@@ -69,6 +69,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       (a, b) => a.third.learningScore.compareTo(b.third.learningScore),
     );
 
+    while (studyCardList.length > vocabularyCount * 2) {
+      studyCardList.removeLast();
+    }
+
+    //scamble
+    studyCardList.shuffle();
+
     while (studyCardList.length > vocabularyCount) {
       studyCardList.removeLast();
     }
