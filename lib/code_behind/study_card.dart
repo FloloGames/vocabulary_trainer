@@ -45,15 +45,15 @@ class StudyCard {
 
   StudyCardStatus _parseLastAnswer(String value) {
     switch (value) {
-      case "ezKnown":
+      case "StudyCardStatus.ezKnown":
         return StudyCardStatus.ezKnown;
-      case "known":
+      case "StudyCardStatus.known":
         return StudyCardStatus.known;
-      case "unknown":
+      case "StudyCardStatus.unknown":
         return StudyCardStatus.unknown;
-      case "notSure":
+      case "StudyCardStatus.notSure":
         return StudyCardStatus.notSure;
-      case "none":
+      case "StudyCardStatus.none":
         return StudyCardStatus.none;
       default:
         return StudyCardStatus.none;

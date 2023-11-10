@@ -15,6 +15,7 @@ import 'package:vocabulary_trainer/screens/settings_page.dart';
 import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 import 'package:vocabulary_trainer/screens/subject_page.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
+import 'package:vocabulary_trainer/widgets/study_card_progress_bar.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class HomePage extends StatefulWidget {

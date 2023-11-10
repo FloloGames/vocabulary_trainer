@@ -1,5 +1,5 @@
 {
-    "newest_version": 1.5,
-    "whats_new": " - important you have to create all your StudyCards again!\n - new StudyCard algorithm\n - added last answer color",
+    "newest_version": 1.6,
+    "whats_new": " - added StudyCardProgressBar :)\n - removed last answer color",
     "hash": ""
 }
