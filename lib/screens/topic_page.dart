@@ -12,6 +12,7 @@ import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart
 import 'package:vocabulary_trainer/screens/settings_page.dart';
 import 'package:vocabulary_trainer/screens/study_card_editor_page.dart';
 import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
+import 'package:vocabulary_trainer/widgets/open_container_widget.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class TopicPage extends StatefulWidget {
@@ -127,6 +128,10 @@ class _TopicPageState extends State<TopicPage> {
           ),
           actions: <Widget>[
             ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                    (states) => widget.topic.color),
+              ),
               child: const Text('Import'),
               onPressed: () {
                 studyCardsString = controller.text;
@@ -134,6 +139,10 @@ class _TopicPageState extends State<TopicPage> {
               },
             ),
             ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                    (states) => widget.topic.color),
+              ),
               child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -156,8 +165,11 @@ class _TopicPageState extends State<TopicPage> {
       child: ScaleAnimation(
         scale: 0.5,
         child: FadeInAnimation(
-          child: GestureDetector(
-            onTap: () async {
+          child: OpenContainerWidget(
+            onLongPress: () {
+              _editStudyCard(index);
+            },
+            openBuilder: (p0, p1) {
               List<Pair3<Subject, Topic, StudyCard>> studyCardList = [];
 
               for (int i = 0; i < widget.topic.studyCards.length; i++) {
@@ -176,57 +188,38 @@ class _TopicPageState extends State<TopicPage> {
               studyCardList.insert(
                   0, Pair3(widget.parentSubject, widget.topic, studyCard));
 
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => StudyCardLearningPage(
-                    studyCardList: studyCardList,
-                  ),
-                ),
+              return StudyCardLearningPage(
+                studyCardList: studyCardList,
               );
-              setState(() {});
             },
-            onDoubleTap: () async {
-              await Navigator.of(context).push<StudyCard>(
-                MaterialPageRoute(
-                  builder: (context) => StudyCardEditorPage(
-                    parentTopic: widget.topic,
-                    studyCard: studyCard,
-                  ),
-                ),
-              );
-              SubjectManager.saveStudyCardAt(
-                  widget.parentSubject, widget.topic, index);
-              setState(() {});
-            },
-            onLongPress: () {
-              _editStudyCard(index);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 375),
-              padding: const EdgeInsets.all(8.0), // Add padding
-              margin: const EdgeInsets.all(08.0),
-              decoration: BoxDecoration(
-                  color: widget.topic.color,
-                  borderRadius:
-                      BorderRadius.circular(16.0), // Add rounded corners
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color.fromARGB(127, 127, 127, 127),
-                      blurRadius: 8.0,
+            closedBuilder: (p0, p1) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 375),
+                padding: const EdgeInsets.all(8.0), // Add padding
+                margin: const EdgeInsets.all(08.0),
+                decoration: BoxDecoration(
+                    color: widget.topic.color,
+                    borderRadius:
+                        BorderRadius.circular(16.0), // Add rounded corners
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromARGB(127, 127, 127, 127),
+                        blurRadius: 8.0,
+                      ),
+                    ]),
+                child: Center(
+                  child: Text(
+                    // "i: ${studyCard.index} | ls: ${studyCard.learningScore}\n${(studyCard.questionLearnObjects[0] as TextObject).text}",
+                    (studyCard.questionLearnObjects[0] as TextObject).text,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ]),
-              child: Center(
-                child: Text(
-                  // "i: ${studyCard.index} | ls: ${studyCard.learningScore}\n${(studyCard.questionLearnObjects[0] as TextObject).text}",
-                  (studyCard.questionLearnObjects[0] as TextObject).text,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ),

@@ -1,5 +1,5 @@
 {
-    "newest_version": 1.6,
-    "whats_new": " - added StudyCardProgressBar :)\n - removed last answer color",
+    "newest_version": 1.7,
+    "whats_new": " - added nice animations and page transitions\n - added glow effect to progress bar\n - bug fixes",
     "hash": ""
 }

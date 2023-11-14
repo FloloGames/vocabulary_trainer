@@ -9,10 +9,9 @@ push
 "Get-FileHash newest_build/app-release.apk -Algorithm SHA256"
 
 
-* Add StudySmarter like Painter at the top
-* color studyCards with last answer 
+* add snack bar
+* StudyCardProgressBar glow fixing
 * settings_page add possibility to change unlockCount and StudyCardCount
-* make topics width wide
 * add SHA256 testing for updates
 * add export button
 * add import button

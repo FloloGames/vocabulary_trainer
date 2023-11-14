@@ -46,45 +46,94 @@ class _StudyCardProgressBarState extends State<StudyCardProgressBar> {
 
     return Container(
       margin: EdgeInsets.all(containerMargin),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: SizedBox(
-          height: 15,
-          width: double.infinity,
-          child: Row(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+      child: SizedBox(
+        height: 50,
+        width: double.infinity,
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              decoration: const BoxDecoration(
                 color: Colors.grey,
-                height: 15,
-                width: getGreyWidth(),
+                // borderRadius: BorderRadius.only(
+                //   topLeft: Radius.circular(8),
+                //   bottomLeft: Radius.circular(8),
+                // ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey,
+                    blurRadius: 8.0,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+              height: 15,
+              width: getGreyWidth(),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              decoration: const BoxDecoration(
                 color: Colors.red,
-                height: 15,
-                width: getRedWidth(),
+                // borderRadius: BorderRadius.only(
+                //     topLeft: Radius.circular(8),
+                //     bottomLeft: Radius.circular(8)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red,
+                    blurRadius: 8.0,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+              height: 15,
+              width: getRedWidth(),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              decoration: const BoxDecoration(
                 color: Colors.yellow,
-                height: 15,
-                width: getYellowWidth(),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.yellow,
+                    blurRadius: 8.0,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+              height: 15,
+              width: getYellowWidth(),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              decoration: const BoxDecoration(
                 color: Colors.green,
-                height: 15,
-                width: getGreenWidth(),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green,
+                    blurRadius: 8.0,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+              height: 15,
+              width: getGreenWidth(),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              decoration: const BoxDecoration(
                 color: Colors.blue,
-                height: 15,
-                width: getBlueWidth(),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue,
+                    blurRadius: 8.0,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-            ],
-          ),
+              height: 15,
+              width: getBlueWidth(),
+            ),
+          ],
         ),
       ),
     );

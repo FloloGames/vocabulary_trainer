@@ -10,6 +10,7 @@ import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart
 import 'package:vocabulary_trainer/screens/settings_page.dart';
 import 'package:vocabulary_trainer/screens/topic_page.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
+import 'package:vocabulary_trainer/widgets/open_container_widget.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class SubjectPage extends StatefulWidget {
@@ -245,6 +246,10 @@ class _SubjectPageState extends State<SubjectPage> {
           ),
           actions: <Widget>[
             ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                    (states) => widget.subject.color),
+              ),
               child: const Text('Add'),
               onPressed: () {
                 subjectName = newItem;
@@ -252,6 +257,10 @@ class _SubjectPageState extends State<SubjectPage> {
               },
             ),
             ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                    (states) => widget.subject.color),
+              ),
               child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -272,46 +281,86 @@ class _SubjectPageState extends State<SubjectPage> {
       child: ScaleAnimation(
         scale: 0.1,
         child: FadeInAnimation(
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                CustomPageTransitionAnimation(
-                  TopicPage(
-                    parentSubject: widget.subject,
-                    topic: topic,
-                  ),
-                  const Alignment(0, 0),
-                ),
-              );
-            },
+          child: OpenContainerWidget(
             onLongPress: () {
               _editSubject(index);
             },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              padding: const EdgeInsets.all(24),
-              margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: topic.color,
-                boxShadow: [
-                  BoxShadow(
-                    color: topic.color,
-                    blurRadius: 8.0,
-                  ),
-                ],
-              ),
-              child: Text(
-                topic.name,
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.visible,
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+            openBuilder: (p0, p1) {
+              return TopicPage(
+                parentSubject: widget.subject,
+                topic: topic,
+              );
+            },
+            closedBuilder: (p0, p1) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                padding: const EdgeInsets.all(24),
+                margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: topic.color,
+                  boxShadow: [
+                    BoxShadow(
+                      color: topic.color,
+                      blurRadius: 8.0,
+                    ),
+                  ],
                 ),
-              ),
-            ),
+                child: Text(
+                  topic.name,
+                  textAlign: TextAlign.left,
+                  overflow: TextOverflow.visible,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            },
           ),
+          // child: GestureDetector(
+          //   onTap: () {
+          //     Navigator.of(context).push(
+          //       CustomPageTransitionAnimation(
+          //         enterWidget: TopicPage(
+          //           parentSubject: widget.subject,
+          //           topic: topic,
+          //         ),
+          //         alignment: const Alignment(0, 0),
+          //         startWidth: 100,
+          //         startHeight: 100,
+          //         color: topic.color,
+          //       ),
+          //     );
+          //   },
+          //   onLongPress: () {
+          //     _editSubject(index);
+          //   },
+          //   child: AnimatedContainer(
+          //     duration: const Duration(milliseconds: 250),
+          //     padding: const EdgeInsets.all(24),
+          //     margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
+          //     decoration: BoxDecoration(
+          //       borderRadius: BorderRadius.circular(16),
+          //       color: topic.color,
+          //       boxShadow: [
+          //         BoxShadow(
+          //           color: topic.color,
+          //           blurRadius: 8.0,
+          //         ),
+          //       ],
+          //     ),
+          //     child: Text(
+          //       topic.name,
+          //       textAlign: TextAlign.left,
+          //       overflow: TextOverflow.visible,
+          //       style: const TextStyle(
+          //         fontSize: 32,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ),
       ),
     );
@@ -330,11 +379,14 @@ class _SubjectPageState extends State<SubjectPage> {
             onTap: () {
               Navigator.of(context).push(
                 CustomPageTransitionAnimation(
-                  TopicPage(
+                  enterWidget: TopicPage(
                     parentSubject: widget.subject,
                     topic: topic,
                   ),
-                  const Alignment(0, 0),
+                  alignment: const Alignment(0, 0),
+                  startWidth: 100,
+                  startHeight: 100,
+                  color: topic.color,
                 ),
               );
             },

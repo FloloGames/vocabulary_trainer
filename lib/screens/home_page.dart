@@ -15,7 +15,9 @@ import 'package:vocabulary_trainer/screens/settings_page.dart';
 import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 import 'package:vocabulary_trainer/screens/subject_page.dart';
 import 'package:vocabulary_trainer/widgets/editable_text_widget.dart';
+import 'package:vocabulary_trainer/widgets/open_container_widget.dart';
 import 'package:vocabulary_trainer/widgets/study_card_progress_bar.dart';
+import 'package:animations/animations.dart';
 // import 'package:reorderables/reorderables.dart';
 
 class HomePage extends StatefulWidget {
@@ -128,37 +130,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         title: const Text('Subjects'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // body: SingleChildScrollView(
-      //   child: ReorderableWrap(
-      //       spacing: 8.0,
-      //       runSpacing: 4.0,
-      //       padding: const EdgeInsets.all(8),
-      //       onReorder: (int oldIndex, int newIndex) {
-      //         setState(() {
-      //           Subject row = subjects.removeAt(oldIndex);
-      //           subjects.insert(newIndex, row);
-      //         });
-      //       },
-      //       onNoReorder: (int index) {
-      //         //this callback is optional
-      //         debugPrint(
-      //             '${DateTime.now().toString().substring(5, 22)} reorder cancelled. index:$index');
-      //       },
-      //       onReorderStarted: (int index) {
-      //         //this callback is optional
-      //         debugPrint(
-      //             '${DateTime.now().toString().substring(5, 22)} reorder started: index:$index');
-      //       },
-      //       children: List.generate(
-      //         subjects.length,
-      //         (index) => contextBuilder(context, index),
-      //       )),
-      // ),
       bottomNavigationBar: _bottomNavigationBar(context),
       floatingActionButton: _floatingActionButton(context),
       body: StreamBuilder(
         stream: SubjectManager.subjectStream,
-        builder: (context, snapshot) {
+        builder: (streamContext, snapshot) {
           return SafeArea(
             child: GridView.count(
               childAspectRatio: 1.0,
@@ -180,7 +156,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget contextBuilder(BuildContext context, int index) {
     final subject = SubjectManager.subjects[index];
 
-    // final globalKey = subject.globalKey;
     return AnimationConfiguration.staggeredGrid(
       columnCount: columnCount,
       position: index,
@@ -188,65 +163,47 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       child: ScaleAnimation(
         scale: 0.5,
         child: FadeInAnimation(
-          child: GestureDetector(
-            // onTapDown: (details) {
-            //   final RenderBox renderBox =
-            //       context.findRenderObject() as RenderBox;
-            //   final localPos = renderBox.globalToLocal(details.globalPosition);
-
-            //   final alignment = Alignment(
-            //     (localPos.dx / renderBox.size.width) * 2 - 1,
-            //     (localPos.dy / renderBox.size.height) * 2 - 1,
-            //   );
-
-            //   Navigator.of(context).push(
-            //     CustomPageTransitionAnimation(
-            //       SubjectPage(
-            //         subject: subject,
-            //       ),
-            //       alignment,
-            //     ),
-            //   );
-            // },
-            onTap: () {
-              Navigator.of(context).push(
-                CustomPageTransitionAnimation(
-                  SubjectPage(
+          child: Builder(
+            builder: (builderContext) {
+              return OpenContainerWidget(
+                onLongPress: () {
+                  _editSubject(index);
+                },
+                openBuilder: (context, action) {
+                  return SubjectPage(
                     subject: subject,
-                  ),
-                  const Alignment(0, 0),
-                ),
+                  );
+                },
+                closedBuilder: (context, action) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 375),
+                    padding: const EdgeInsets.all(8.0), // Add padding
+                    margin: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                        color: subject.color,
+                        borderRadius:
+                            BorderRadius.circular(16.0), // Add rounded corners
+                        boxShadow: [
+                          BoxShadow(
+                            color: subject.color,
+                            blurRadius: 8.0,
+                          ),
+                        ]),
+                    child: Center(
+                      child: Text(
+                        subject.name,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               );
             },
-            onLongPress: () {
-              _editSubject(index);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 375),
-              padding: const EdgeInsets.all(8.0), // Add padding
-              margin: const EdgeInsets.all(08.0),
-              decoration: BoxDecoration(
-                  color: subject.color,
-                  borderRadius:
-                      BorderRadius.circular(16.0), // Add rounded corners
-                  boxShadow: [
-                    BoxShadow(
-                      color: subject.color,
-                      blurRadius: 8.0,
-                    ),
-                  ]),
-              child: Center(
-                child: Text(
-                  subject.name,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.visible,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
           ),
         ),
       ),
@@ -420,16 +377,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onPressed: () {},
           icon: const Icon(Icons.library_books),
         ),
-        IconButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              CustomPageTransitionAnimation(
-                const SettingsPage(),
-                const Alignment(1, 1),
-              ),
-            );
+        OpenContainerWidget(
+          openBuilder: (p0, p1) {
+            return const SettingsPage();
           },
-          icon: const Icon(Icons.settings),
+          closedBuilder: (p0, p1) {
+            return const Icon(Icons.settings);
+          },
+          onLongPress: () {},
         ),
       ],
     );
@@ -447,3 +402,33 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   //   return "subjectContainer:$index";
   // }
 }
+
+//Old body
+
+/*
+// body: SingleChildScrollView(
+      //   child: ReorderableWrap(
+      //       spacing: 8.0,
+      //       runSpacing: 4.0,
+      //       padding: const EdgeInsets.all(8),
+      //       onReorder: (int oldIndex, int newIndex) {
+      //         setState(() {
+      //           Subject row = subjects.removeAt(oldIndex);
+      //           subjects.insert(newIndex, row);
+      //         });
+      //       },
+      //       onNoReorder: (int index) {
+      //         //this callback is optional
+      //         debugPrint(
+      //             '${DateTime.now().toString().substring(5, 22)} reorder cancelled. index:$index');
+      //       },
+      //       onReorderStarted: (int index) {
+      //         //this callback is optional
+      //         debugPrint(
+      //             '${DateTime.now().toString().substring(5, 22)} reorder started: index:$index');
+      //       },
+      //       children: List.generate(
+      //         subjects.length,
+      //         (index) => contextBuilder(context, index),
+      //       )),
+      // ), */
