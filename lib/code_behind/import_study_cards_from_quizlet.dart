@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
+import 'package:vocabulary_trainer/code_behind/learning_objects/text_object.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
@@ -32,9 +32,9 @@ class ImportStudyCardsFromQuizlet {
       studyCard.answerLearnObjects.clear();
 
       studyCard.questionLearnObjects
-          .add(TextObject(questionAndAnswer[0], Offset.zero, Paint()));
+          .add(TextObject(questionAndAnswer[0], Alignment.center, studyCard));
       studyCard.answerLearnObjects
-          .add(TextObject(questionAndAnswer[1], Offset.zero, Paint()));
+          .add(TextObject(questionAndAnswer[1], Alignment.center, studyCard));
 
       SubjectManager.addStudyCard(subject, topic, studyCard);
     }

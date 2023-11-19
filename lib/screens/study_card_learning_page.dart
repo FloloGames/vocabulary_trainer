@@ -6,7 +6,6 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
-import 'package:vocabulary_trainer/code_behind/learning_objects.dart';
 import 'package:vocabulary_trainer/code_behind/pair.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/study_card_provider.dart';
@@ -102,8 +101,17 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
         title: Text(
           "${widget.studyCardList[currCardIndex].first.name}/${widget.studyCardList[currCardIndex].second.name}",
         ),
-        actions: const [
-          //TODO: zurück oder so
+        actions: [
+          IconButton(
+            onPressed: () {
+              currCardIndex--;
+              if (currCardIndex < 0) {
+                currCardIndex = widget.studyCardList.length - 1;
+              }
+              setState(() {});
+            },
+            icon: const Icon(Icons.arrow_back_sharp),
+          ),
           // IconButton(
           //   onPressed: _addNewStudyCard,
           //   icon: const Icon(Icons.add),
@@ -118,12 +126,21 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
   Widget _body(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
+    final containerWidth = width * 0.8;
+    final containerHeight = width * 0.8 * 6 / 4;
+
     return Center(
       child: Stack(
         children: [
-          Center(child: _nextCardPrev(width)),
+          _nextCardPrev(
+            containerWidth: containerWidth,
+            containerHeight: containerHeight,
+          ),
           LayoutBuilder(
             builder: (context, constraints) {
+              StudyCard currStudyCard =
+                  widget.studyCardList[currCardIndex].third;
+
               final duration = Duration(
                 milliseconds: _studyCardProvider.isDragging ? 0 : 400,
               );
@@ -198,70 +215,11 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
                     onPanEnd: (details) {
                       _studyCardProvider.endPosition();
                     },
-                    child: FlipCard(
-                      controller: _flipCardController,
-                      flipOnTouch: true,
-                      front: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        //margin: containerMargin,
-                        // color: const Color.fromARGB(255, 255, 255, 255),
-                        width: width * 0.8,
-                        height: width * 0.8 * 6 / 4,
-                        decoration: ShapeDecoration(
-                          color: studyCardColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          shadows: [
-                            BoxShadow(
-                              color: studyCardColor,
-                              blurRadius: 18,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            // "index: ${widget.studyCardList[currCardIndex].third.index}\nscore: ${widget.studyCardList[currCardIndex].third.learningScore}\n${(widget.studyCardList[currCardIndex].third.questionLearnObjects[0] as TextObject).text}",
-                            (widget.studyCardList[currCardIndex].third
-                                    .questionLearnObjects[0] as TextObject)
-                                .text,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 22,
-                            ),
-                          ),
-                        ),
-                      ),
-                      back: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: width * 0.8,
-                        height: width * 0.8 * 6 / 4,
-                        decoration: ShapeDecoration(
-                          color: studyCardColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          shadows: [
-                            BoxShadow(
-                              color: studyCardColor,
-                              blurRadius: 18,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            (widget.studyCardList[currCardIndex].third
-                                    .answerLearnObjects[0] as TextObject)
-                                .text,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 22,
-                            ),
-                          ),
-                        ),
-                      ),
+                    child: currStudyCard.createLearningWidget(
+                      containerHeight: containerHeight,
+                      containerWidth: containerWidth,
+                      flipCardController: _flipCardController,
+                      studyCardColor: studyCardColor,
                     ),
                   ),
                 ),
@@ -283,75 +241,25 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
     );
   }
 
-  Widget _nextCardPrev(double width) {
-    if (currCardIndex + 1 >= widget.studyCardList.length) {
-      return Container(
-        //margin: containerMargin,
-        // color: const Color.fromARGB(255, 255, 255, 255),
-        width: width * 0.8,
-        height: width * 0.8 * 6 / 4,
-        decoration: ShapeDecoration(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          shadows: const [
-            BoxShadow(
-              color: Colors.white,
-              blurRadius: 18,
-            ),
-          ],
-        ),
-        child: const Center(
-          child: Column(
-            children: [
-              // const Text(
-              //   "Du bist durch!\nNochmal?",
-              //   style: TextStyle(
-              //     color: Colors.black,
-              //     fontSize: 22,
-              //   ),
-              // ),
-              // TextButton(
-              //   child: const Text('Nochmal!'),
-              //   onPressed: () {
-              //     currCardIndex = 0;
-              //     setState(() {});
-              //   },
-              // ),
-            ],
-          ),
-        ),
-      );
-    } //else..
-    return Container(
-      //margin: containerMargin,
-      // color: const Color.fromARGB(255, 255, 255, 255),
-      width: width * 0.8,
-      height: width * 0.8 * 6 / 4,
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        shadows: const [
-          BoxShadow(
-            color: Colors.white,
-            blurRadius: 18,
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          (widget.studyCardList[currCardIndex + 1].third.questionLearnObjects[0]
-                  as TextObject)
-              .text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 22,
-          ),
-        ),
+  Widget _nextCardPrev({
+    required double containerWidth,
+    required double containerHeight,
+  }) {
+    int nextCardIndex = currCardIndex + 1;
+    if (nextCardIndex >= widget.studyCardList.length) {
+      nextCardIndex = 0;
+    }
+
+    if (!widget.repeat) {
+      return Container();
+    }
+
+    return Center(
+      child: widget.studyCardList[nextCardIndex].third.createLearningWidget(
+        containerHeight: containerHeight,
+        containerWidth: containerWidth,
+        flipCardController: FlipCardController(),
+        studyCardColor: Colors.white,
       ),
     );
   }
@@ -431,27 +339,27 @@ class _StudyCardLearningPageState extends State<StudyCardLearningPage> {
   }
 }
 
-class StudyCardPainter extends CustomPainter {
-  final List<LearningObject> _learningObjects;
+// class StudyCardPainter extends CustomPainter {
+//   final List<LearningObject> _learningObjects;
 
-  StudyCardPainter(this._learningObjects);
+//   StudyCardPainter(this._learningObjects);
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (int i = 0; i < _learningObjects.length; i++) {
-      LearningObject obj = _learningObjects[i];
-      obj.drawObject(canvas);
-    }
-  }
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     for (int i = 0; i < _learningObjects.length; i++) {
+//       LearningObject obj = _learningObjects[i];
+//       obj.drawObject(canvas);
+//     }
+//   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
-}
+//   @override
+//   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+//     return true;
+//   }
+// }
 
-class DrawingPoints {
-  Paint paint;
-  Offset points;
-  DrawingPoints({required this.points, required this.paint});
-}
+// class DrawingPoints {
+//   Paint paint;
+//   Offset points;
+//   DrawingPoints({required this.points, required this.paint});
+// }

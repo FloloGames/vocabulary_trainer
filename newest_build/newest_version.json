@@ -1,5 +1,5 @@
 {
-    "newest_version": 1.7,
-    "whats_new": " - added nice animations and page transitions\n - added glow effect to progress bar\n - bug fixes",
+    "newest_version": 1.8,
+    "whats_new": " - added moveable text\n - added multiple text on studycard\n - added back-button on learning page\n - IMPORTANT: you have to recreate all of your cards!!",
     "hash": ""
 }
