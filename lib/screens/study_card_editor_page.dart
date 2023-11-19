@@ -1,11 +1,18 @@
 // ignore_for_file: constant_identifier_names
 
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:vocabulary_trainer/code_behind/learning_objects/image_object.dart';
+import 'package:vocabulary_trainer/code_behind/learning_objects/learning_object.dart';
 import 'package:vocabulary_trainer/code_behind/learning_objects/text_object.dart';
 import 'package:vocabulary_trainer/code_behind/study_card.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:vocabulary_trainer/screens/custom_bottom_app_bar.dart';
 
 //FlipCard dimensions: 400 * 600
 
@@ -51,6 +58,8 @@ class _StudyCardEditorPageState extends State<StudyCardEditorPage> {
   // LearningObject? _currentLearningObject = null;
 
   final FlipCardController _flipCardController = FlipCardController();
+  double containerWidth = -1;
+  double containerHeight = -1;
 
   @override
   void initState() {
@@ -83,7 +92,19 @@ class _StudyCardEditorPageState extends State<StudyCardEditorPage> {
         title: Text(
           "${widget.parentTopic.name} / edit Study Card",
         ),
-        actions: [
+        actions: const [
+          // IconButton(
+          //   onPressed: _addNewText,
+          //   icon: const Icon(Icons.add),
+          // ),
+        ],
+      ),
+      bottomNavigationBar: CustomBottomAppBar(
+        children: [
+          IconButton(
+            onPressed: _addNewImage,
+            icon: const Icon(Icons.add_photo_alternate),
+          ),
           IconButton(
             onPressed: _addNewText,
             icon: const Icon(Icons.add),
@@ -95,28 +116,15 @@ class _StudyCardEditorPageState extends State<StudyCardEditorPage> {
     );
   }
 
-  void _addNewText() {
-    TextObject textObject =
-        TextObject("Tap to Edit", Alignment.center, widget.studyCard);
-    FlipCardState? state = _flipCardController.state;
-    if (state == null) return;
-    if (state.isFront) {
-      widget.studyCard.questionLearnObjects.add(textObject);
-    } else {
-      widget.studyCard.answerLearnObjects.add(textObject);
-    }
-    setState(() {});
-  }
-
   Widget _body(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     // final height = MediaQuery.of(context).size.height;
 
-    double containerWidth = width * 0.8;
-    double containerHeight = width * 0.8 * 6 / 4;
+    containerWidth = width * 0.8;
+    containerHeight = width * 0.8 * 6 / 4;
 
-    double animContainerW = 100;
-    double animContainerH = 100;
+    // double animContainerW = 100;
+    // double animContainerH = 100;
 
     return Center(
       child: widget.studyCard.createEditingWidget(
@@ -125,6 +133,59 @@ class _StudyCardEditorPageState extends State<StudyCardEditorPage> {
         containerHeight: containerHeight,
       ),
     );
+  }
+
+  void _addNewText() {
+    TextObject textObject =
+        TextObject("Tap to Edit", Alignment.center, widget.studyCard);
+    _addToCurrentLearnObjects(textObject);
+    setState(() {});
+  }
+
+  void _addToCurrentLearnObjects(LearningObject learningObject) {
+    FlipCardState? state = _flipCardController.state;
+    if (state == null) return;
+    if (state.isFront) {
+      widget.studyCard.questionLearnObjects.add(learningObject);
+    } else {
+      widget.studyCard.answerLearnObjects.add(learningObject);
+    }
+  }
+
+  Future<void> _addNewImage() async {
+    final ImagePicker picker = ImagePicker();
+    // Pick an image.
+    //width und height * 1.5 damit es genau so groß ist wie der container
+    final XFile? imageFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: containerWidth * 1.5,
+      maxHeight: containerHeight * 1.5,
+    );
+
+    if (imageFile == null) return;
+
+    final ByteData data = await imageFile
+        .readAsBytes()
+        .then((value) => ByteData.sublistView(value));
+    ui.Image img = await decodeImageFromList(Uint8List.view(data.buffer));
+
+    ByteData? byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+
+    if (byteData == null) return;
+
+    Uint8List pngBytes = byteData.buffer.asUint8List();
+    int width = img.width;
+    int height = img.height;
+
+    try {
+      ImageObject imgObject = ImageObject(
+          pngBytes, width, height, Alignment.center, widget.studyCard);
+
+      _addToCurrentLearnObjects(imgObject);
+      setState(() {});
+    } catch (e) {
+      print(e);
+    }
   }
 
   // Padding _bottomNavigationBar(BuildContext context) {

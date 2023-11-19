@@ -1,5 +1,5 @@
 {
-    "newest_version": 1.8,
-    "whats_new": " - added moveable text\n - added multiple text on studycard\n - added back-button on learning page\n - IMPORTANT: you have to recreate all of your cards!!",
+    "newest_version": 1.9,
+    "whats_new": " - added Image support\n",
     "hash": ""
 }

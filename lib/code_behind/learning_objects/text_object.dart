@@ -15,7 +15,7 @@ class TextObject extends LearningObject {
   TextObject(this.text, super.alignment, super.parent);
 
   @override
-  Widget creatEditingWidget() {
+  Widget createEditingWidget() {
     return createAlignmentWidget(
       child: TextObjectEditingWidget(
         initialText: text,
@@ -28,7 +28,7 @@ class TextObject extends LearningObject {
   }
 
   @override
-  Widget creatLearningWidget({Widget? child}) {
+  Widget createLearningWidget({Widget? child}) {
     return createAlignmentWidget(
       child: TextObjectLearningWidget(
         text: text,

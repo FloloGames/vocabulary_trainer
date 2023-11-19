@@ -6,6 +6,7 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:vocabulary_trainer/code_behind/learning_objects/image_object.dart';
 import 'package:vocabulary_trainer/code_behind/learning_objects/learning_object.dart';
 import 'package:vocabulary_trainer/code_behind/learning_objects/text_object.dart';
 import 'package:vocabulary_trainer/code_behind/study_card_provider.dart';
@@ -66,7 +67,7 @@ class StudyCard {
           ),
         );
       }
-      return questionLearnObjects.first.creatLearningWidget();
+      return questionLearnObjects.first.createLearningWidget();
     }
 
     return Image.memory(
@@ -133,7 +134,7 @@ class StudyCard {
       THUMBNAIL_WIDTH_KEY: thumbnailWidth,
       THUMBNAIL_HEIGHT_KEY: thumbnailHeight,
       THUMBNAIL_BYTES_KEY:
-          thumbnailBytes == null ? "null" : base64.encode(thumbnailBytes!),
+          thumbnailBytes == null ? "null" : base64Encode(thumbnailBytes!),
     };
   }
 
@@ -172,19 +173,10 @@ class StudyCard {
     questionLearnObjects.clear();
     for (int i = 0; i < listOfJson.length; i++) {
       Map<String, dynamic> objJson = listOfJson[i];
-      switch (objJson[LearningObject.TYPE_KEY]) {
-        case TextObject.TYPE_KEY:
-          TextObject textObject = TextObject(
-            "Tap to edit text.",
-            Alignment.center,
-            this,
-          );
-          textObject.setParamsFromJson(objJson);
-          questionLearnObjects.add(textObject);
-          break;
-      }
-      // LearningObject obj = questionLearnObjects[i];
-      // obj.setParamsFromJson(objJson);
+      LearningObject? learningObject = _createLearningObjFromJson(objJson);
+
+      if (learningObject == null) continue;
+      questionLearnObjects.add(learningObject);
     }
   }
 
@@ -192,17 +184,34 @@ class StudyCard {
     answerLearnObjects.clear();
     for (int i = 0; i < listOfJson.length; i++) {
       Map<String, dynamic> objJson = listOfJson[i];
-      switch (objJson[LearningObject.TYPE_KEY]) {
-        case TextObject.TYPE_KEY:
-          TextObject textObject = TextObject(
-            "Tap to edit text.",
-            Alignment.center,
-            this,
-          );
-          textObject.setParamsFromJson(objJson);
-          answerLearnObjects.add(textObject);
-          break;
-      }
+      LearningObject? learningObject = _createLearningObjFromJson(objJson);
+      if (learningObject == null) continue;
+      answerLearnObjects.add(learningObject);
+    }
+  }
+
+  LearningObject? _createLearningObjFromJson(Map<String, dynamic> objJson) {
+    switch (objJson[LearningObject.TYPE_KEY]) {
+      case TextObject.TYPE_KEY:
+        TextObject textObject = TextObject(
+          "Tap to edit text.",
+          Alignment.center,
+          this,
+        );
+        textObject.setParamsFromJson(objJson);
+        return textObject;
+      case ImageObject.TYPE_KEY:
+        ImageObject imageObject = ImageObject(
+          Uint8List.fromList([]),
+          -1,
+          -1,
+          Alignment.center,
+          this,
+        );
+        imageObject.setParamsFromJson(objJson);
+        return imageObject;
+      default:
+        return null;
     }
   }
 
@@ -274,7 +283,7 @@ class _StudyCardLearningWidgetState extends State<StudyCardLearningWidget> {
             (index) {
               LearningObject learningObject =
                   widget.studyCard.questionLearnObjects[index];
-              return learningObject.creatLearningWidget();
+              return learningObject.createLearningWidget();
             },
           ),
         ),
@@ -303,7 +312,7 @@ class _StudyCardLearningWidgetState extends State<StudyCardLearningWidget> {
             (index) {
               LearningObject learningObject =
                   widget.studyCard.answerLearnObjects[index];
-              return learningObject.creatLearningWidget();
+              return learningObject.createLearningWidget();
             },
           ),
         ),
@@ -407,7 +416,7 @@ class _StudyCardEditingWidgetState extends State<StudyCardEditingWidget> {
                             setState(() {});
                           },
                           learningObject: learningObject,
-                          child: learningObject.creatEditingWidget(),
+                          child: learningObject.createEditingWidget(),
                         );
                       },
                     ),
@@ -443,7 +452,7 @@ class _StudyCardEditingWidgetState extends State<StudyCardEditingWidget> {
                           setState(() {});
                         },
                         learningObject: learningObject,
-                        child: learningObject.creatEditingWidget(),
+                        child: learningObject.createEditingWidget(),
                       );
                     },
                   ),
@@ -456,6 +465,8 @@ class _StudyCardEditingWidgetState extends State<StudyCardEditingWidget> {
     );
   }
 
+  double lastScale = 1;
+
   Widget _learningObjectGestureDetector({
     required LearningObject learningObject,
     void Function()? onLongPress,
@@ -463,6 +474,9 @@ class _StudyCardEditingWidgetState extends State<StudyCardEditingWidget> {
   }) {
     return GestureDetector(
       onLongPress: onLongPress,
+      onScaleStart: (details) {
+        lastScale = 1;
+      },
       onScaleUpdate: (details) {
         Alignment touchedPosAlignment = Alignment(
           details.localFocalPoint.dx * 2 / widget.containerWidth - 1,
@@ -484,27 +498,32 @@ class _StudyCardEditingWidgetState extends State<StudyCardEditingWidget> {
         }
 
         learningObject.alignment = touchedPosAlignment;
-        // learningObject.alignment = Alignment(
-        //   learningObject.alignment.x +
-        //       details.focalPointDelta.dx * 2 / widget.containerWidth,
-        //   learningObject.alignment.y +
-        //       details.focalPointDelta.dy * 2 / widget.containerHeight,
-        // );
 
-        //print("${touchedPosAlignment.x} : ${touchedPosAlignment.y}");
+        // print("${learningObject.alignment.x} : ${learningObject.alignment.y}");
 
         learningObject.alignment = _snapToPoints(touchedPosAlignment);
 
-        learningObject.scale += (details.scale - 1) / 100;
-        if (learningObject.scale < MIN_SCALE) {
-          learningObject.scale = MIN_SCALE;
-        }
-        if (learningObject.scale > MAX_SCALE) {
-          learningObject.scale = MAX_SCALE;
-        }
+        double deltaScale = details.scale - lastScale;
+        learningObject.updateScale(deltaScale);
+
+        // print(deltaScale);
+        // print(learningObject.scale);
+        lastScale = details.scale;
+
+        // learningObject.scale += (details.scale - 1) / 100;
+
+        // if (learningObject.scale < MIN_SCALE) {
+        //   learningObject.scale = MIN_SCALE;
+        // }
+        // if (learningObject.scale > MAX_SCALE) {
+        //   learningObject.scale = MAX_SCALE;
+        // }
 
         //TODO: fixen und rotation hinzufügen
         setState(() {});
+      },
+      onScaleEnd: (details) {
+        lastScale = 1;
       },
       child: child,
     );

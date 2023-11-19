@@ -27,9 +27,20 @@ abstract class LearningObject {
     );
   }
 
-  Widget creatLearningWidget();
+  Widget createLearningWidget();
 
-  Widget creatEditingWidget();
+  Widget createEditingWidget();
+
+  void updateScale(double delta) {
+    scale += delta;
+
+    if (scale <= 0) {
+      scale = 0.1;
+    }
+    if (scale >= 2) {
+      scale = 2;
+    }
+  }
 
   Map<String, dynamic> toJson() {
     return {
