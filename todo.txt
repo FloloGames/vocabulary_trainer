@@ -20,3 +20,4 @@ push
 
 BUGS:
 * StudyCardProgressBar wenn man nur eine StudyCard hat dann kann es passieren dass man eine negative minimum width hat.
+* Wenn man learnObject (mit langem drücken) löscht dann löscht man meistens das falsche

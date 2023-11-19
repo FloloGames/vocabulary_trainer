@@ -340,6 +340,15 @@ class _StudyCardEditingWidgetState extends State<StudyCardEditingWidget> {
   final GlobalKey _questionStackKey = GlobalKey();
 
   Future<void> setStudyCardThumbnail() async {
+    if (widget.studyCard.questionLearnObjects.length == 1) {
+      //wenn nur 1 frage vorhanden ist, dann zeig nur LearnObject an also nicht das thumbnail speichern..
+
+      widget.studyCard.thumbnailBytes = null;
+      widget.studyCard.thumbnailWidth = -1;
+      widget.studyCard.thumbnailHeight = -1;
+      return;
+    }
+
     RenderRepaintBoundary boundary = _questionStackKey.currentContext!
         .findRenderObject() as RenderRepaintBoundary;
     ui.Image image = await boundary.toImage();
@@ -394,7 +403,7 @@ class _StudyCardEditingWidgetState extends State<StudyCardEditingWidget> {
                         return _learningObjectGestureDetector(
                           onLongPress: () {
                             widget.studyCard.questionLearnObjects
-                                .removeAt(index);
+                                .remove(learningObject);
                             setState(() {});
                           },
                           learningObject: learningObject,
