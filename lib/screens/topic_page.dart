@@ -56,6 +56,7 @@ class _TopicPageState extends State<TopicPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
         onPressed: _addNewStudyCard,
         elevation: 5,
         child: const Icon(Icons.add),

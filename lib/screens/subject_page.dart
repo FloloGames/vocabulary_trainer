@@ -49,6 +49,7 @@ class _SubjectPageState extends State<SubjectPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
         onPressed: _addNewTopic,
         elevation: 5,
         child: const Icon(Icons.add),

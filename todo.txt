@@ -13,11 +13,12 @@ push
 * settings_page add possibility to change unlockCount and StudyCardCount
 * add SHA256 testing for updates
 * add export button
+* zip: https://flutterward.wordpress.com/2021/08/12/how-to-zip-extract-zip-file-in-flutter/
 * add import button
 * https://www.youtube.com/watch?v=fL6nUEUAY4g
 * vielleicht: https://pub.dev/packages/animated_notch_bottom_bar/example
 * vielleicht: wenn export und import schon funktioniert, dann NFC übertragung hinzufügen.
-
+* https://stackoverflow.com/questions/37394355/how-can-i-send-a-text-string-to-another-device-via-nfc
 BUGS:
 * StudyCardProgressBar wenn man nur eine StudyCard hat dann kann es passieren dass man eine negative minimum width hat.
 * Wenn man learnObject (mit langem drücken) löscht dann löscht man meistens das falsche

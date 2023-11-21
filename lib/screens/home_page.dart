@@ -11,6 +11,7 @@ import 'package:vocabulary_trainer/code_behind/topic.dart';
 import 'package:vocabulary_trainer/screens/custom_bottom_app_bar.dart';
 import 'package:vocabulary_trainer/screens/custom_page_transition_animation.dart';
 import 'package:vocabulary_trainer/screens/hero_dialog_route.dart';
+import 'package:vocabulary_trainer/screens/import_export_page.dart';
 import 'package:vocabulary_trainer/screens/settings_page.dart';
 import 'package:vocabulary_trainer/screens/study_card_learning_page.dart';
 import 'package:vocabulary_trainer/screens/subject_page.dart';
@@ -373,9 +374,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget _bottomNavigationBar(BuildContext context) {
     return CustomBottomAppBar(
       children: [
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.library_books),
+        OpenContainerWidget(
+          openBuilder: (p0, p1) {
+            return const ImportExportPage();
+          },
+          closedBuilder: (p0, p1) {
+            return const Icon(Icons.library_books);
+          },
+          onLongPress: () {},
         ),
         OpenContainerWidget(
           openBuilder: (p0, p1) {
@@ -392,6 +398,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Widget _floatingActionButton(BuildContext context) {
     return FloatingActionButton(
+      shape: const CircleBorder(),
       onPressed: _addNewSubject,
       elevation: 5,
       child: const Icon(Icons.add),
