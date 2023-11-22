@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vocabulary_trainer/code_behind/android_count_unlocks_manager.dart';
 import 'package:vocabulary_trainer/code_behind/pair.dart';
+import 'package:vocabulary_trainer/code_behind/study_card.dart';
+import 'package:vocabulary_trainer/code_behind/study_card_provider.dart';
 import 'package:vocabulary_trainer/code_behind/subject.dart';
 import 'package:vocabulary_trainer/code_behind/subject_manager.dart';
 import 'package:vocabulary_trainer/code_behind/topic.dart';
@@ -38,7 +40,7 @@ class _ImportExportPageState extends State<ImportExportPage> {
   final Curve _stepTransitionCurve = Curves.easeOut;
   final Duration _stepTransitionDuration = const Duration(milliseconds: 500);
 
-  File? _selectedImportFile;
+  Directory? _selectedImportDir;
 
   Mode _currentMode = Mode.none; //egal welcher mode
 
@@ -48,7 +50,7 @@ class _ImportExportPageState extends State<ImportExportPage> {
   @override
   void initState() {
     super.initState();
-    SubjectManager.loadSubjects(loadTopics_: true);
+    SubjectManager.loadSubjects(loadTopics_: true, loadStudyCards_: true);
     _asyncInit();
   }
 
@@ -145,10 +147,42 @@ class _ImportExportPageState extends State<ImportExportPage> {
 
             if (!selectedFile.existsSync()) return;
 
-            _selectedImportFile = selectedFile;
-            print(_selectedImportFile!.path);
+            // _selectedImportFile = selectedFile;
 
             _currentMode = Mode.import;
+
+            final tempDir = await getTemporaryDirectory();
+
+            // if (tempDir.existsSync()) {
+            //   tempDir.deleteSync();
+            // }
+            tempDir.createSync();
+
+            final bytes = selectedFile.readAsBytesSync();
+
+            // Decode the Zip file
+            final archive = ZipDecoder().decodeBytes(bytes);
+
+            // Extract the contents of the Zip archive to disk.
+            for (final file in archive) {
+              final filename = file.name;
+              if (file.isFile) {
+                final data = file.content as List<int>;
+                File(
+                    '${tempDir.path}${SubjectManager.SUBJECTS_SAVE_DIR_NAME}$filename')
+                  ..createSync(recursive: true)
+                  ..writeAsBytesSync(data);
+              } else {
+                Directory(
+                        '${tempDir.path}${SubjectManager.SUBJECTS_SAVE_DIR_NAME}$filename')
+                    .create(recursive: true);
+              }
+            }
+
+            _selectedImportDir =
+                Directory(tempDir.path + SubjectManager.SUBJECTS_SAVE_DIR_NAME);
+            _selectedTopics.clear();
+
             _pageController.nextPage(
               duration: _stepTransitionDuration,
               curve: _stepTransitionCurve,
@@ -186,7 +220,160 @@ class _ImportExportPageState extends State<ImportExportPage> {
   }
 
   Widget _importStep() {
-    return const Center(child: Text("Import Todo"));
+    if (_selectedImportDir == null) Navigator.of(context).pop();
+
+    return FutureBuilder(
+      future: SubjectManager.loadSubjectsFromDirectory(
+        _selectedImportDir!,
+        (p0) => null,
+        true,
+        true,
+      ),
+      builder: (context, data) {
+        final loadedSubjects = data.data;
+
+        if (loadedSubjects == null) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: loadedSubjects.length,
+                itemBuilder: (context, subjectIndex) {
+                  Subject subject = loadedSubjects[subjectIndex];
+
+                  return ExpansionTile(
+                    leading: Icon(
+                      Icons.circle,
+                      color: subject.color,
+                    ),
+                    tilePadding:
+                        const EdgeInsetsDirectional.symmetric(horizontal: 16),
+                    // collapsedBackgroundColor: subject.color,
+                    title: Text(
+                      subject.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                    children: List.generate(
+                      subject.topics.length,
+                      (topicIndex) {
+                        Topic topic = subject.topics[topicIndex];
+                        //_selectedTopics
+                        return ExportTopicListItem(
+                          subject: subject,
+                          topic: topic,
+                          index: topicIndex,
+                          selectedTopics: _selectedTopics,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            // const Text("StudyCards will get overriten!"),
+            const SizedBox(
+              height: 12,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _onImportButtonPressed(loadedSubjects),
+                  child: const Text("Import"),
+                ),
+              ],
+            ),
+            const Spacer(),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onImportButtonPressed(List<Subject> loadedSubjects) async {
+    if (_selectedTopics.isEmpty) {
+      return;
+    }
+    // print("import: $_selectedTopics");
+    // for(sub)
+    // SubjectManager.subjects.
+
+    for (String topicStr in _selectedTopics) {
+      String subjectName = topicStr.split("/")[0];
+      String topicName = topicStr.split("/")[1];
+
+      Subject importSubject =
+          loadedSubjects.firstWhere((element) => element.name == subjectName);
+      Topic importTopic = importSubject.topics
+          .firstWhere((element) => element.name == topicName);
+
+      Subject? localSubject;
+
+      try {
+        localSubject = SubjectManager.subjects.firstWhere(
+          (element) => element.name == subjectName,
+        );
+      } catch (e) {
+        localSubject = null;
+      }
+
+      if (localSubject == null) {
+        localSubject = Subject(name: subjectName);
+        localSubject.setColor(importSubject.color);
+        localSubject.topics.add(importTopic);
+        SubjectManager.addSubject(
+          localSubject,
+          saveStudyCards_: true,
+          saveTopics_: true,
+        );
+      } else {
+        Topic? localTopic;
+        try {
+          localTopic = localSubject.topics.firstWhere(
+            (element) => element.name == topicName,
+          );
+        } catch (e) {
+          localTopic = null;
+        }
+
+        if (localTopic == null) {
+          localTopic = importTopic;
+          for (int i = 0; i < localTopic.studyCards.length; i++) {
+            StudyCard studyCard = localTopic.studyCards[i];
+            studyCard.index = i;
+            studyCard.lastAnswer = StudyCardStatus.none;
+            studyCard.learningScore = -3;
+          }
+          localSubject.topics.add(localTopic);
+        } else {
+          int len = localTopic.studyCards.length;
+          for (int i = 0; i < importTopic.studyCards.length; i++) {
+            StudyCard studyCard = importTopic.studyCards[i];
+            studyCard.index = len + i;
+            studyCard.lastAnswer = StudyCardStatus.none;
+            studyCard.learningScore = -3;
+            localTopic.studyCards.add(studyCard);
+          }
+        }
+        SubjectManager.saveSubject(
+          localSubject,
+          saveTopics_: true,
+          saveStudyCards_: true,
+        );
+      }
+    }
+    await Future.delayed(const Duration(seconds: 1));
+    SubjectManager.loadSubjects();
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Widget _exportStep() {
@@ -271,8 +458,11 @@ class _ImportExportPageState extends State<ImportExportPage> {
 
                 File out = File(savePath);
                 if (!out.existsSync()) return;
-                Share.shareXFiles([XFile(out.path)],
+                final result = await Share.shareXFiles([XFile(out.path)],
                     text: "Share you StudyCards!");
+                if (result.status == ShareResultStatus.success && mounted) {
+                  Navigator.of(context).pop();
+                }
               },
               child: const Text("Export and Share"),
             ),
@@ -338,9 +528,9 @@ class _ImportExportPageState extends State<ImportExportPage> {
   Text _getTitleText() {
     switch (_currentMode) {
       case Mode.import:
-        return const Text("Import");
+        return const Text("Select topics to Import");
       case Mode.export:
-        return const Text("Export");
+        return const Text("Select topics to Export");
       case Mode.none:
         return const Text("Import / Export");
     }
@@ -396,3 +586,74 @@ class ExportTopicStateListItem extends State<ExportTopicListItem> {
     );
   }
 }
+ // //if it does not exists then create a new Subject
+
+                      // if (importSubject == null) {
+                      //   importSubject = loadedSubjects.firstWhere(
+                      //       (element) => element.name == subjectName);
+
+                      //   for (Topic topic in importSubject.topics) {
+                      //     for (int i = 0; i < topic.studyCards.length; i++) {
+                      //       StudyCard studyCard = topic.studyCards[i];
+                      //       studyCard.learningScore = -3;
+                      //       studyCard.lastAnswer = StudyCardStatus.none;
+                      //       studyCard.index = i;
+                      //     }
+                      //   }
+                      //   SubjectManager.addSubject(
+                      //     importSubject,
+                      //     saveTopics_: true,
+                      //     saveStudyCards_: true,
+                      //   );
+
+                      //   continue;
+                      // } else {
+                      //   Subject loadedSubject = loadedSubjects.firstWhere(
+                      //       (element) => element.name == subjectName);
+
+                      //   for (Topic topic in loadedSubject.topics) {
+                      //     if(importSubject.topics.any((element) => element.name==topicName)){
+                      //       //test if topic already exists
+                      //     } else {
+                      //       //if not set from loaded
+                      //       importSubject.
+                      //     }
+                      //   }
+                      //loadedSubjects
+                      // .firstWhere((element) => element.name == subjectName);
+
+                      //test if the topic already exists
+                      // for (int i = 0; i < importSubject.topics.length; i++) {
+                      //   Topic currTopic = importSubject.topics[i];
+                      //   if (topicName == currTopic.name) {
+                      //     importTopic = currTopic;
+                      //     break;
+                      //   }
+                      // }
+
+                      // try {
+                      //   importTopic ??= loadedSubjects
+                      //       .firstWhere(
+                      //           (element) => element.name == subjectName)
+                      //       .topics
+                      //       .firstWhere((element) => element.name == topicName);
+
+                      //   int len = importTopic.studyCards.length;
+                      //   for (int i = 0;
+                      //       i < importTopic.studyCards.length;
+                      //       i++) {
+                      //     StudyCard studyCard = importTopic.studyCards[i];
+                      //     studyCard.index = len + i;
+                      //     studyCard.lastAnswer = StudyCardStatus.none;
+                      //     studyCard.learningScore = -3; //TODO
+                      //     importTopic.studyCards.add(studyCard);
+                      //   }
+
+                      //   SubjectManager.addSubject(
+                      //     Subject(name: subjectName),
+                      //     saveTopics_: true,
+                      //     saveStudyCards_: true,
+                      //   );
+                      // } catch (e) {
+                      //   print(e);
+                      // }

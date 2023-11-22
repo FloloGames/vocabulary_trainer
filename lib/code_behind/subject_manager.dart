@@ -189,9 +189,17 @@ class SubjectManager {
     }
   }
 
-  static void addSubject(Subject subject) {
+  static void addSubject(
+    Subject subject, {
+    bool saveTopics_ = false,
+    bool saveStudyCards_ = false,
+  }) {
     subjects.add(subject);
-    saveSubject(subject);
+    saveSubject(
+      subject,
+      saveTopics_: saveTopics_,
+      saveStudyCards_: saveStudyCards_,
+    );
   }
 
   static void addTopic(Subject subject, Topic topic) {
@@ -199,10 +207,15 @@ class SubjectManager {
     saveTopic(subject, topic);
   }
 
-  static Future<void> loadSubjects({bool loadTopics_ = false}) async {
-    final Directory saveDir = await getSubjectsSaveDir();
+  static Future<List<Subject>> loadSubjectsFromDirectory(
+    Directory directory,
+    Function(Subject) onSubjectLoaded,
+    bool loadTopics_,
+    bool loadStudyCards_,
+  ) async {
+    List<Subject> loadedSubjects = [];
 
-    List<FileSystemEntity> subjectFiles = saveDir.listSync(
+    List<FileSystemEntity> subjectFiles = directory.listSync(
       recursive: false,
       followLinks: false,
     );
@@ -219,7 +232,9 @@ class SubjectManager {
           loadingSubjectMap[currDirName] = Subject(name: currDirName);
         }
 
-        await loadTopics(loadingSubjectMap[currDirName]!);
+        await loadTopicsFromDir(loadingSubjectMap[currDirName]!, currDir,
+            (pair) => null, loadStudyCards_);
+        onSubjectLoaded.call(loadingSubjectMap[currDirName]!);
       } else if (currFileEntity is File) {
         File currFile = currFileEntity;
         final currFileName = path.basename(currFile.path);
@@ -235,26 +250,39 @@ class SubjectManager {
           final map = jsonDecode(json);
           loadingSubjectMap[currSubjectName]!.setParamsFromJson(map);
 
-          subjects = loadingSubjectMap.values.toList();
-
-          subjectStream.add(loadingSubjectMap[currSubjectName]!);
+          loadedSubjects = loadingSubjectMap.values.toList();
+          onSubjectLoaded.call(loadingSubjectMap[currSubjectName]!);
         } catch (e) {
           print(e);
         }
         //load topics
       }
     }
+
+    return loadedSubjects;
   }
 
-  static Future<void> loadTopics(
-    Subject subject, {
-    bool loadStudyCards_ = false,
-  }) async {
-    Directory topicSaveDir = await getTopicsSaveDir(subject);
+  static Future<void> loadSubjects(
+      {bool loadTopics_ = false, bool loadStudyCards_ = false}) async {
+    final Directory saveDir = await getSubjectsSaveDir();
 
-    topicSaveDir.createSync(recursive: false);
+    subjects = await loadSubjectsFromDirectory(
+      saveDir,
+      (subject) {
+        subjectStream.add(subject);
+      },
+      loadTopics_,
+      loadStudyCards_,
+    );
+  }
 
-    List<FileSystemEntity> subjectFiles = topicSaveDir.listSync(
+  static Future<void> loadTopicsFromDir(
+    Subject subject,
+    Directory directory,
+    Function(Pair<Subject, Topic>) onTopicLoaded,
+    bool loadStudyCards_,
+  ) async {
+    List<FileSystemEntity> subjectFiles = directory.listSync(
       recursive: false,
       followLinks: false,
     );
@@ -273,7 +301,14 @@ class SubjectManager {
           loadingTopicMap[currTopicName] = Topic(name: currTopicName);
         }
 
-        await loadStudyCards(subject, loadingTopicMap[currTopicName]!);
+        await loadStudyCardsFromDir(
+          subject,
+          loadingTopicMap[currTopicName]!,
+          currDir,
+          (Pair<Topic, StudyCard> pair) => null,
+        );
+        final pair = Pair(subject, loadingTopicMap[currTopicName]!);
+        onTopicLoaded.call(pair);
       } else if (currFileEntity is File) {
         File currFile = currFileEntity;
         final currFileName = path.basename(currFile.path);
@@ -293,7 +328,7 @@ class SubjectManager {
           subject.topics = loadingTopicMap.values.toList();
 
           final pair = Pair(subject, loadingTopicMap[currTopicName]!);
-          topicStream.add(pair);
+          onTopicLoaded.call(pair);
         } catch (e) {
           print(e);
         }
@@ -301,12 +336,31 @@ class SubjectManager {
     }
   }
 
-  static Future<void> loadStudyCards(Subject subject, Topic topic) async {
-    Directory topicSaveDir = await getStudyCardDir(subject, topic);
+  static Future<void> loadTopics(
+    Subject subject, {
+    bool loadStudyCards_ = false,
+  }) async {
+    Directory topicSaveDir = await getTopicsSaveDir(subject);
 
     topicSaveDir.createSync(recursive: false);
 
-    List<FileSystemEntity> studyCardFiles = topicSaveDir.listSync(
+    await loadTopicsFromDir(
+      subject,
+      topicSaveDir,
+      (pair) {
+        topicStream.add(pair);
+      },
+      loadStudyCards_,
+    );
+  }
+
+  static Future<void> loadStudyCardsFromDir(
+    Subject subject,
+    Topic topic,
+    Directory directory,
+    Function(Pair<Topic, StudyCard>) onStudyCardLoaded,
+  ) async {
+    List<FileSystemEntity> studyCardFiles = directory.listSync(
       recursive: false,
       followLinks: false,
     );
@@ -336,12 +390,22 @@ class SubjectManager {
           topic.studyCards = loadingStudyCardsMap.values.toList();
 
           final pair = Pair(topic, loadingStudyCardsMap[currStudyCardName]!);
-          studyCardStream.add(pair);
+          onStudyCardLoaded.call(pair);
         } catch (e) {
           print(e);
         }
       }
     }
+  }
+
+  static Future<void> loadStudyCards(Subject subject, Topic topic) async {
+    Directory topicSaveDir = await getStudyCardDir(subject, topic);
+
+    topicSaveDir.createSync(recursive: false);
+
+    await loadStudyCardsFromDir(subject, topic, topicSaveDir, (pair) {
+      studyCardStream.add(pair);
+    });
   }
 
   static Future<Directory> getLearningTopicsSaveDir() async {
@@ -383,13 +447,21 @@ class SubjectManager {
     return studyCardsSaveDir;
   }
 
-  static Future<void> saveSubjectAt(int index) async {
+  static Future<void> saveSubjectAt(
+    int index, {
+    bool saveTopics_ = false,
+    bool saveStudyCards_ = false,
+  }) async {
     Subject currSubject = subjects[index];
-    saveSubject(currSubject);
+    saveSubject(
+      currSubject,
+      saveTopics_: saveTopics_,
+      saveStudyCards_: saveStudyCards_,
+    );
   }
 
   static Future<void> saveSubject(Subject currSubject,
-      {bool saveTopics_ = false}) async {
+      {bool saveTopics_ = false, bool saveStudyCards_ = false}) async {
     final Directory saveDir = await getSubjectsSaveDir();
 
     Map<String, dynamic> json = currSubject.toJson();
@@ -407,7 +479,7 @@ class SubjectManager {
     }
 
     for (int i = 0; i < currSubject.topics.length; i++) {
-      await saveTopicAt(currSubject, i);
+      await saveTopicAt(currSubject, i, saveStudyCards: saveStudyCards_);
     }
   }
 
@@ -438,7 +510,7 @@ class SubjectManager {
   static Future<void> saveTopicAt(Subject subject, int index,
       {bool saveStudyCards = false}) async {
     Topic currTopic = subject.topics[index];
-    return saveTopic(subject, currTopic);
+    return saveTopic(subject, currTopic, saveStudyCards: saveStudyCards);
   }
 
   static Future<void> saveStudyCardAt(
